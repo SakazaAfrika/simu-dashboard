@@ -669,7 +669,7 @@ def show_dashboard():
             st.markdown("<div style='text-align:right;padding-top:12px;'><span class='live-dot'></span><span style='font-size:13px;color:#4adeaa;font-weight:500;'>LIVE</span></div>",unsafe_allow_html=True)
         st.markdown("<br>",unsafe_allow_html=True)
 
-        if not has_real_data and len(df) == 0:
+        if not not has_real_data and not campaigns:
             st.markdown("""<div style='background:#0d332c;border:1px solid rgba(74,222,170,0.15);border-radius:10px;padding:40px;text-align:center;margin:20px 0;'>
             <div style='font-size:32px;margin-bottom:12px;'>📭</div>
             <div style='font-size:18px;font-weight:500;color:#fff;margin-bottom:8px;'>No responses yet</div>
