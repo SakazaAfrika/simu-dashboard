@@ -56,7 +56,7 @@ div[data-baseweb="base-input"] input { color: #e8f5f1 !important; background: tr
 button[data-testid="baseButton-secondary"] { background: rgba(255,255,255,0.08) !important; color: #e8f5f1 !important; }
 div[data-baseweb="select"] div { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; }
 div[data-baseweb="select"] span { color: #e8f5f1 !important; }
-.stButton button:hover { background: #6be8bc !important; }
+div[data-testid="stRadio"] label p { color: #e8f5f1 !important; } div[data-testid="stRadio"] label { color: #e8f5f1 !important; } { background: #6be8bc !important; }
 span[data-baseweb="tag"] { background-color: rgba(74,222,170,0.15) !important; border-color: rgba(74,222,170,0.3) !important; }
 span[data-baseweb="tag"] span { color: #4adeaa !important; }
 .stButton button[kind="secondary"] { background: rgba(255,255,255,0.08) !important; color: #e8f5f1 !important; }
