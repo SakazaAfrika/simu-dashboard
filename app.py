@@ -54,6 +54,7 @@ div[data-baseweb="base-input"], div[data-baseweb="base-input"] > div { backgroun
 div[data-baseweb="base-input"] input { color: #e8f5f1 !important; background: transparent !important; }
 .stButton button { background: #4adeaa !important; color: #0a2a24 !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; font-family: 'DM Sans', sans-serif !important; transition: all 0.2s !important; }
 .stButton button:hover { background: #6be8bc !important; }
+div[data-testid="stCheckbox"] label p { color: #e8f5f1 !important; font-size: 14px !important; }
 .voice-card { background: #0d332c; border-left: 3px solid rgba(74,222,170,0.5); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 12px; border-top: 1px solid rgba(74,222,170,0.08); border-right: 1px solid rgba(74,222,170,0.08); border-bottom: 1px solid rgba(74,222,170,0.08); }
 .voice-text { font-size: 14px; color: rgba(232,245,241,0.85); line-height: 1.6; margin-bottom: 8px; }
 .voice-meta { font-size: 11px; color: rgba(232,245,241,0.35); }
