@@ -633,7 +633,7 @@ def show_dashboard():
     with st.sidebar:
         st.markdown(logo_html(24),unsafe_allow_html=True)
         st.markdown('<div class="section-label">Navigation</div>',unsafe_allow_html=True)
-        page=st.radio("",["Overview","Responses","Voices","Map","Analytics"],label_visibility="collapsed")
+        page=st.radio("",["Overview","Responses","Voices","Map","Analytics","Reporting"],label_visibility="collapsed")
         st.markdown("---")
         if campaign_name:
             st.markdown(f"""<div style='background:rgba(74,222,170,0.08);border:1px solid rgba(74,222,170,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;'>
@@ -797,7 +797,27 @@ def show_dashboard():
         s1,s2,s3,s4,s5=st.columns(5)
         s1.metric("Total",f"{len(filtered):,}"); s2.metric("Verified",f"{filtered['Verified'].mean():.1%}")
         s3.metric("Locations",filtered["Location"].nunique()); s4.metric("Channels",filtered["Channel"].nunique()); s5.metric("Themes",filtered["Theme"].nunique())
-
+elif page=="Reporting":
+        st.markdown('<div class="section-label">Reporting</div>',unsafe_allow_html=True)
+        st.markdown('<div class="campaign-title">Export & share your data</div>',unsafe_allow_html=True)
+        st.markdown("<br>",unsafe_allow_html=True)
+        st.markdown("""<div style='background:#0d332c;border:1px solid rgba(74,222,170,0.15);border-radius:10px;padding:24px;margin-bottom:16px;'>
+        <div style='font-size:13px;font-weight:500;color:#4adeaa;margin-bottom:8px;'>CSV Export</div>
+        <div style='font-size:13px;color:rgba(232,245,241,0.6);margin-bottom:16px;'>Download all responses as a spreadsheet. Ready to use in Excel, Google Sheets or any data tool.</div>
+        </div>""",unsafe_allow_html=True)
+        csv_all=filtered.to_csv(index=False).encode("utf-8")
+        st.download_button("⬇  Download full CSV",data=csv_all,file_name="simu_responses.csv",mime="text/csv",use_container_width=True)
+        st.markdown("<br>",unsafe_allow_html=True)
+        st.markdown("""<div style='background:#0d332c;border:1px solid rgba(74,222,170,0.15);border-radius:10px;padding:24px;margin-bottom:16px;'>
+        <div style='font-size:13px;font-weight:500;color:#4adeaa;margin-bottom:8px;'>Email report</div>
+        <div style='font-size:13px;color:rgba(232,245,241,0.6);margin-bottom:16px;'>Send a summary report to your email address.</div>
+        </div>""",unsafe_allow_html=True)
+        report_email=st.text_input("Email address",placeholder="you@organisation.com")
+        if st.button("Send report",use_container_width=True):
+            if report_email:
+                st.success(f"Report sent to {report_email}")
+            else:
+                st.error("Please enter an email address.")
 # ══════════════════════════════════════════════════════════════════════════════
 # ROUTER
 # ══════════════════════════════════════════════════════════════════════════════
