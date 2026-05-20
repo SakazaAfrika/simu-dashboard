@@ -37,6 +37,9 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap');
 html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
 .stApp { background-color: #0a2a24; color: #e8f5f1; }
+header[data-testid="stHeader"] { display: none !important; }
+#MainMenu { display: none !important; }
+footer { display: none !important; }
 section[data-testid="stSidebar"] { background-color: #0d332c !important; border-right: 1px solid rgba(74,222,170,0.12); }
 section[data-testid="stSidebar"] * { color: #e8f5f1 !important; }
 div[data-testid="metric-container"] { background: #0d332c; border: 1px solid rgba(74,222,170,0.15); border-radius: 10px; padding: 16px 20px; }
