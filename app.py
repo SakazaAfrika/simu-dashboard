@@ -57,6 +57,8 @@ button[data-testid="baseButton-secondary"] { background: rgba(255,255,255,0.08) 
 div[data-baseweb="select"] div { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; }
 div[data-baseweb="select"] span { color: #e8f5f1 !important; }
 .stButton button:hover { background: #6be8bc !important; }
+span[data-baseweb="tag"] { background-color: rgba(74,222,170,0.15) !important; border-color: rgba(74,222,170,0.3) !important; }
+span[data-baseweb="tag"] span { color: #4adeaa !important; }
 .stButton button[kind="secondary"] { background: rgba(255,255,255,0.08) !important; color: #e8f5f1 !important; }
 div[data-testid="stCheckbox"] label p { color: #e8f5f1 !important; font-size: 14px !important; }
 .voice-card { background: #0d332c; border-left: 3px solid rgba(74,222,170,0.5); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 12px; border-top: 1px solid rgba(74,222,170,0.08); border-right: 1px solid rgba(74,222,170,0.08); border-bottom: 1px solid rgba(74,222,170,0.08); }
