@@ -310,6 +310,41 @@ def show_respondent_page(slug):
         </div>
         """, unsafe_allow_html=True)
 
+def show_reset_password():
+    _,col,_ = st.columns([1,1.2,1])
+    with col:
+        st.markdown("<br><br>",unsafe_allow_html=True)
+        st.markdown(logo_html(32),unsafe_allow_html=True)
+        st.markdown("<div style='font-size:22px;font-weight:500;color:#fff;margin-bottom:4px;'>Set new password</div><div style='font-size:13px;color:rgba(232,245,241,0.4);margin-bottom:24px;'>Choose a new password for your account.</div>",unsafe_allow_html=True)
+        with st.form("reset_password_form"):
+            new_password = st.text_input("New password", type="password", placeholder="At least 8 characters")
+            confirm_password = st.text_input("Confirm password", type="password", placeholder="Repeat your new password")
+            st.markdown("<br>",unsafe_allow_html=True)
+            submitted = st.form_submit_button("Set new password", use_container_width=True)
+            if submitted:
+                if not new_password or not confirm_password:
+                    st.error("Please fill in both fields.")
+                elif len(new_password) < 8:
+                    st.error("Password must be at least 8 characters.")
+                elif new_password != confirm_password:
+                    st.error("Passwords do not match.")
+                else:
+                    try:
+                        token = st.session_state.get("reset_token")
+                        with httpx.Client() as client:
+                            r = client.put(
+                                f"{SUPABASE_URL}/auth/v1/user",
+                                headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                                json={"password": new_password}
+                            )
+                        if r.status_code == 200:
+                            st.success("Password updated! You can now log in.")
+                            st.session_state.auth_page = "login"
+                            st.rerun()
+                        else:
+                            st.error("Something went wrong. Please try again.")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
 # ══════════════════════════════════════════════════════════════════════════════
 # LANDING
 # ══════════════════════════════════════════════════════════════════════════════
