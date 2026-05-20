@@ -53,6 +53,9 @@ div[data-testid="stTextInput"] label, div[data-testid="stTextArea"] label { colo
 div[data-baseweb="base-input"], div[data-baseweb="base-input"] > div { background-color: rgba(255,255,255,0.04) !important; }
 div[data-baseweb="base-input"] input { color: #e8f5f1 !important; background: transparent !important; }
 .stButton button { background: #4adeaa !important; color: #0a2a24 !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; font-family: 'DM Sans', sans-serif !important; transition: all 0.2s !important; }
+button[data-testid="baseButton-secondary"] { background: rgba(255,255,255,0.08) !important; color: #e8f5f1 !important; }
+div[data-baseweb="select"] div { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; }
+div[data-baseweb="select"] span { color: #e8f5f1 !important; }
 .stButton button:hover { background: #6be8bc !important; }
 .stButton button[kind="secondary"] { background: rgba(255,255,255,0.08) !important; color: #e8f5f1 !important; }
 div[data-testid="stCheckbox"] label p { color: #e8f5f1 !important; font-size: 14px !important; }
@@ -576,7 +579,7 @@ def show_launch_confirmation():
         st.markdown(f"""<div style='font-size:12px;color:rgba(232,245,241,0.35);margin-top:6px;margin-bottom:16px;'>Use this to test the respondent experience right now. Open it in a new tab.</div>
         <div style='font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(74,222,170,0.5);margin-bottom:10px;'>Live link (once deployed)</div>""",unsafe_allow_html=True)
         st.code(live_link, language=None)
-        st.markdown("""<div style='font-size:12px;color:rgba(232,245,241,0.35);margin-top:6px;'>This is the link to share with respondents once the app is deployed.</div>
+        st.markdown("""<div style='font-size:12px;color:rgba(232,245,241,0.35);margin-top:6px;'>This is the link to share with respondents once your campaign is ready to go live.</div>
         </div>""",unsafe_allow_html=True)
 
         st.markdown("<br>",unsafe_allow_html=True)
