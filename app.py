@@ -801,7 +801,7 @@ def show_dashboard():
         s1,s2,s3,s4,s5=st.columns(5)
         s1.metric("Total",f"{len(filtered):,}"); s2.metric("Verified",f"{filtered['Verified'].mean():.1%}")
         s3.metric("Locations",filtered["Location"].nunique()); s4.metric("Channels",filtered["Channel"].nunique()); s5.metric("Themes",filtered["Theme"].nunique())
-elif page=="Reporting":
+    elif page=="Reporting":
         st.markdown('<div class="section-label">Reporting</div>',unsafe_allow_html=True)
         st.markdown('<div class="campaign-title">Export & share your data</div>',unsafe_allow_html=True)
         st.markdown("<br>",unsafe_allow_html=True)
