@@ -861,8 +861,21 @@ def show_dashboard():
 # ROUTER
 # ══════════════════════════════════════════════════════════════════════════════
 params = st.query_params
+try:
+    import urllib.parse
+    full_url = st.context.headers.get("referer","")
+    if "#" in full_url:
+        hash_part = full_url.split("#")[1]
+        hash_params = dict(urllib.parse.parse_qsl(hash_part))
+        if "access_token" in hash_params and hash_params.get("type") == "recovery":
+            st.session_state.reset_token = hash_params["access_token"]
+            st.session_state.auth_page = "reset_password"
+except: pass
+
 if "c" in params:
     show_respondent_page(params["c"])
+elif st.session_state.auth_page == "reset_password":
+    show_reset_password()
 elif st.session_state.user is None:
     if st.session_state.auth_page=="signup": show_signup()
     elif st.session_state.auth_page=="login": show_login()
