@@ -45,13 +45,13 @@ div[data-testid="metric-container"] div[data-testid="stMetricValue"] { color: #f
 div[data-testid="metric-container"] div[data-testid="stMetricDelta"] { color: #4adeaa !important; }
 h1, h2, h3 { color: #ffffff !important; }
 hr { border-color: rgba(74,222,170,0.1); }
-div[data-testid="stTextInput"] input { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(74,222,170,0.2) !important; border-radius: 8px !important; color: #e8f5f1 !important; caret-color: #4adeaa !important; }
-div[data-testid="stTextInput"] input:focus { background: #0d332c !important; color: #e8f5f1 !important; }
-div[data-baseweb="base-input"] { background: rgba(255,255,255,0.04) !important; }
+input, input[type="text"], input[type="password"], input[type="email"] { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; caret-color: #4adeaa !important; }
+input:focus { background-color: #0d332c !important; color: #e8f5f1 !important; }
+textarea { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; border: 1px solid rgba(74,222,170,0.2) !important; border-radius: 8px !important; }
+textarea:focus { background-color: #0d332c !important; color: #e8f5f1 !important; }
+div[data-testid="stTextInput"] label, div[data-testid="stTextArea"] label { color: rgba(232,245,241,0.6) !important; font-size: 12px !important; }
+div[data-baseweb="base-input"], div[data-baseweb="base-input"] > div { background-color: rgba(255,255,255,0.04) !important; }
 div[data-baseweb="base-input"] input { color: #e8f5f1 !important; background: transparent !important; }
-div[data-testid="stTextInput"] label { color: rgba(232,245,241,0.6) !important; font-size: 12px !important; }
-textarea { background: rgba(255,255,255,0.04) !important; color: #e8f5f1 !important; border: 1px solid rgba(74,222,170,0.2) !important; border-radius: 8px !important; }
-textarea:focus { background: #0d332c !important; color: #e8f5f1 !important; }
 .stButton button { background: #4adeaa !important; color: #0a2a24 !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; font-family: 'DM Sans', sans-serif !important; transition: all 0.2s !important; }
 .stButton button:hover { background: #6be8bc !important; }
 .voice-card { background: #0d332c; border-left: 3px solid rgba(74,222,170,0.5); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 12px; border-top: 1px solid rgba(74,222,170,0.08); border-right: 1px solid rgba(74,222,170,0.08); border-bottom: 1px solid rgba(74,222,170,0.08); }
