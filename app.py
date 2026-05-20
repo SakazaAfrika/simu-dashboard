@@ -43,6 +43,8 @@ div[data-testid="metric-container"] { background: #0d332c; border: 1px solid rgb
 div[data-testid="metric-container"] label { color: rgba(232,245,241,0.5) !important; font-size: 12px !important; text-transform: uppercase; }
 div[data-testid="metric-container"] div[data-testid="stMetricValue"] { color: #ffffff !important; font-size: 28px !important; font-weight: 500; }
 div[data-testid="metric-container"] div[data-testid="stMetricDelta"] { color: #4adeaa !important; }
+div[data-testid="stMetricValue"] { color: #ffffff !important; }
+div[data-testid="stMetricLabel"] { color: rgba(232,245,241,0.6) !important; }
 h1, h2, h3 { color: #ffffff !important; }
 hr { border-color: rgba(74,222,170,0.1); }
 input, input[type="text"], input[type="password"], input[type="email"] { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; caret-color: #4adeaa !important; }
@@ -52,15 +54,17 @@ textarea:focus { background-color: #0d332c !important; color: #e8f5f1 !important
 div[data-testid="stTextInput"] label, div[data-testid="stTextArea"] label { color: rgba(232,245,241,0.6) !important; font-size: 12px !important; }
 div[data-baseweb="base-input"], div[data-baseweb="base-input"] > div { background-color: rgba(255,255,255,0.04) !important; }
 div[data-baseweb="base-input"] input { color: #e8f5f1 !important; background: transparent !important; }
-.stButton button { background: #4adeaa !important; color: #0a2a24 !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; font-family: 'DM Sans', sans-serif !important; transition: all 0.2s !important; }
-button[data-testid="baseButton-secondary"] { background: rgba(255,255,255,0.08) !important; color: #e8f5f1 !important; }
 div[data-baseweb="select"] div { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; }
 div[data-baseweb="select"] span { color: #e8f5f1 !important; }
-div[data-testid="stRadio"] label p { color: #e8f5f1 !important; } div[data-testid="stRadio"] label { color: #e8f5f1 !important; } { background: #6be8bc !important; }
+div[data-testid="stSelectbox"] label { color: rgba(232,245,241,0.6) !important; }
+.stButton button { background: #4adeaa !important; color: #0a2a24 !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; font-family: 'DM Sans', sans-serif !important; transition: all 0.2s !important; }
+.stButton button:hover { background: #6be8bc !important; }
+button[data-testid="baseButton-secondary"] { background: rgba(255,255,255,0.08) !important; color: #e8f5f1 !important; }
+div[data-testid="stCheckbox"] label p { color: #e8f5f1 !important; font-size: 14px !important; }
+div[data-testid="stRadio"] label p { color: #e8f5f1 !important; }
+div[data-testid="stRadio"] label { color: #e8f5f1 !important; }
 span[data-baseweb="tag"] { background-color: rgba(74,222,170,0.15) !important; border-color: rgba(74,222,170,0.3) !important; }
 span[data-baseweb="tag"] span { color: #4adeaa !important; }
-.stButton button[kind="secondary"] { background: rgba(255,255,255,0.08) !important; color: #e8f5f1 !important; }
-div[data-testid="stCheckbox"] label p { color: #e8f5f1 !important; font-size: 14px !important; }
 .voice-card { background: #0d332c; border-left: 3px solid rgba(74,222,170,0.5); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 12px; border-top: 1px solid rgba(74,222,170,0.08); border-right: 1px solid rgba(74,222,170,0.08); border-bottom: 1px solid rgba(74,222,170,0.08); }
 .voice-text { font-size: 14px; color: rgba(232,245,241,0.85); line-height: 1.6; margin-bottom: 8px; }
 .voice-meta { font-size: 11px; color: rgba(232,245,241,0.35); }
@@ -73,7 +77,7 @@ div[data-testid="stCheckbox"] label p { color: #e8f5f1 !important; font-size: 14
 .step-pip { height: 4px; flex: 1; border-radius: 2px; background: rgba(74,222,170,0.15); }
 .step-pip.active { background: #4adeaa; }
 .step-pip.done { background: rgba(74,222,170,0.5); }
-.prompt-block { background: rgba(255,255,255,0.03); border-left: 2px solid rgba(74,222,170,0.4); border-radius: 0 8px 8px 0; padding: 12px 14px; margin-bottom: 10px; border-top: 0.5px solid rgba(74,222,170,0.08); border-right: 0.5px solid rgba(74,222,170,0.08); border-bottom: 0.5px solid rgba(74,222,170,0.08); }
+.prompt-block { background: rgba(255,255,255,0.03); border-left: 2px solid rgba(74,222,170,0.4); border-radius: 0 8px 8px 0; padding: 12px 14px; margin-bottom: 10px; }
 .resp-input { width: 100%; background: #f8fffe; border: 1px solid #d0f0e8; border-radius: 8px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: #1a3a32; outline: none; resize: vertical; min-height: 80px; }
 .resp-card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px; border: 1px solid #e8f5f1; }
 </style>
