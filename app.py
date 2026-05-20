@@ -47,7 +47,7 @@ div[data-testid="metric-container"] label { color: rgba(232,245,241,0.5) !import
 div[data-testid="metric-container"] div[data-testid="stMetricValue"] { color: #ffffff !important; font-size: 28px !important; font-weight: 500; }
 div[data-testid="metric-container"] div[data-testid="stMetricDelta"] { color: #4adeaa !important; }
 div[data-testid="stMetricValue"] { color: #ffffff !important; }
-div[data-testid="stMetricLabel"] { color: rgba(232,245,241,0.6) !important; }
+div[data-testid="stMetricLabel"] { color: rgba(232,245,241,0.9) !important; font-size: 13px !important; }
 h1, h2, h3 { color: #ffffff !important; }
 hr { border-color: rgba(74,222,170,0.1); }
 input, input[type="text"], input[type="password"], input[type="email"] { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; caret-color: #4adeaa !important; }
