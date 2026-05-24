@@ -10,8 +10,9 @@ import httpx
 
 st.set_page_config(page_title="simu · Dashboard", page_icon="🟢", layout="wide", initial_sidebar_state="expanded")
 
-SUPABASE_URL = st.secrets["SUPABASE_URL"]
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+import os
+SUPABASE_URL = os.environ.get("SUPABASE_URL") or st.secrets.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY") or st.secrets.get("SUPABASE_KEY", "")
 BASE_URL = "http://localhost:8501"
 
 def get_auth_client():
