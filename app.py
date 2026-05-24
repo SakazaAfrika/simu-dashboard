@@ -239,7 +239,13 @@ def show_respondent_page(slug):
                 Your data is handled in accordance with applicable data protection laws including POPIA and GDPR.
             </div></div>
             """, unsafe_allow_html=True)
-
+            st.markdown("""
+<div style='background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #d8f0e8;'>
+    <div style='font-size:13px;font-weight:500;color:#1d9e75;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;'>Verify you are a real person</div>
+    <div style='font-size:12px;color:#6a9a8a;margin-bottom:14px;'>Take a quick selfie. It will not be stored — just used to confirm there is a real person behind this story.</div>
+</div>
+""", unsafe_allow_html=True)
+selfie = st.camera_input("", label_visibility="collapsed")
             submitted = st.form_submit_button("Submit my story", use_container_width=True)
 
             if submitted:
@@ -256,7 +262,7 @@ def show_respondent_page(slug):
                                 "location": location,
                                 "content": " | ".join([f"Q{i+1}: {a}" for i,a in enumerate(answers) if a]),
                                 "channel": "Web link",
-                                "verified": True,
+                                "verified": selfie is not None,
                                 "format": "Text",
                             }
                             supabase_request("POST", "responses", response_data)
