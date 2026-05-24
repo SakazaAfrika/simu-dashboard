@@ -248,7 +248,7 @@ def show_respondent_page(slug):
 selfie = st.camera_input("", label_visibility="collapsed")
 submitted = st.form_submit_button("Submit my story", use_container_width=True)
 
-            if submitted:
+if submitted:
                 if not any(answers) or not location:
                     st.error("Please answer at least one question and share your location.")
                 elif not perm_media or not perm_contact:
