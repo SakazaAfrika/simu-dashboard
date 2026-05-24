@@ -246,7 +246,7 @@ def show_respondent_page(slug):
 </div>
 """, unsafe_allow_html=True)
 selfie = st.camera_input("", label_visibility="collapsed")
-            submitted = st.form_submit_button("Submit my story", use_container_width=True)
+submitted = st.form_submit_button("Submit my story", use_container_width=True)
 
             if submitted:
                 if not any(answers) or not location:
