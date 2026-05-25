@@ -156,7 +156,8 @@ def show_respondent_page(slug):
         result = supabase_request("GET", f"campaigns?slug=eq.{slug}&is_live=eq.true")
         if isinstance(result, list) and result:
             campaign = result[0]
-    except: pass
+    except:
+        pass
 
     _,col,_ = st.columns([1,2,1])
     with col:
@@ -239,45 +240,48 @@ def show_respondent_page(slug):
                 Your data is handled in accordance with applicable data protection laws including POPIA and GDPR.
             </div></div>
             """, unsafe_allow_html=True)
+
             st.markdown("""
-<div style='background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #d8f0e8;'>
-    <div style='font-size:13px;font-weight:500;color:#1d9e75;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;'>Verify you are a real person</div>
-    <div style='font-size:12px;color:#6a9a8a;margin-bottom:14px;'>Take a quick selfie. It will not be stored — just used to confirm there is a real person behind this story.</div>
-</div>
-""", unsafe_allow_html=True)
-selfie = st.camera_input("", label_visibility="collapsed")
-submitted = st.form_submit_button("Submit my story", use_container_width=True)
+            <div style='background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #d8f0e8;'>
+                <div style='font-size:13px;font-weight:500;color:#1d9e75;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;'>Verify you are a real person</div>
+                <div style='font-size:12px;color:#6a9a8a;margin-bottom:14px;'>Take a quick selfie. It will not be stored — just used to confirm there is a real person behind this story.</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-if submitted:
-                if not any(answers) or not location:
-                    st.error("Please answer at least one question and share your location.")
-                elif not perm_media or not perm_contact:
-                    st.error("Please tick both permission boxes before submitting.")
-                else:
-                    if campaign:
-                        try:
-                            response_data = {
-                                "campaign_id": campaign['id'],
-                                "respondent_id": contact_name if contact_name else f"Anon #{random.randint(1000,9999)}",
-                                "location": location,
-                                "content": " | ".join([f"Q{i+1}: {a}" for i,a in enumerate(answers) if a]),
-                                "channel": "Web link",
-                                "verified": selfie is not None,
-                                "format": "Text",
-                            }
-                            supabase_request("POST", "responses", response_data)
-                            if contact_name or phone or email:
-                                contact_data = {"campaign_id": campaign['id'], "name": contact_name, "phone": phone, "email": email, "location": location, "perm_media": perm_media, "perm_contact": perm_contact}
-                                supabase_request("POST", "contacts", contact_data)
-                        except: pass
+            selfie = st.camera_input("", label_visibility="collapsed")
+            submitted = st.form_submit_button("Submit my story", use_container_width=True)
 
-                    st.markdown("""
-                    <div style='background:#1d9e75;border-radius:12px;padding:28px;text-align:center;margin-top:16px;'>
-                        <div style='font-size:32px;margin-bottom:12px;'>&#10003;</div>
-                        <div style='font-size:20px;font-weight:600;color:#fff;margin-bottom:8px;'>Thank you.</div>
-                        <div style='font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;'>Your voice has been received and verified.</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+        if submitted:
+            if not any(answers) or not location:
+                st.error("Please answer at least one question and share your location.")
+            elif not perm_media or not perm_contact:
+                st.error("Please tick both permission boxes before submitting.")
+            else:
+                if campaign:
+                    try:
+                        response_data = {
+                            "campaign_id": campaign['id'],
+                            "respondent_id": contact_name if contact_name else f"Anon #{random.randint(1000,9999)}",
+                            "location": location,
+                            "content": " | ".join([f"Q{i+1}: {a}" for i,a in enumerate(answers) if a]),
+                            "channel": "Web link",
+                            "verified": selfie is not None,
+                            "format": "Text",
+                        }
+                        supabase_request("POST", "responses", response_data)
+                        if contact_name or phone or email:
+                            contact_data = {"campaign_id": campaign['id'], "name": contact_name, "phone": phone, "email": email, "location": location, "perm_media": perm_media, "perm_contact": perm_contact}
+                            supabase_request("POST", "contacts", contact_data)
+                    except:
+                        pass
+
+                st.markdown("""
+                <div style='background:#1d9e75;border-radius:12px;padding:28px;text-align:center;margin-top:16px;'>
+                    <div style='font-size:32px;margin-bottom:12px;'>&#10003;</div>
+                    <div style='font-size:20px;font-weight:600;color:#fff;margin-bottom:8px;'>Thank you.</div>
+                    <div style='font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;'>Your voice has been received and verified.</div>
+                </div>
+                """, unsafe_allow_html=True)
 
         st.markdown("""<div style='text-align:center;margin-top:24px;font-size:14px;font-weight:500;color:#1d9e75;'>simu by Sakaza Afrika</div>""", unsafe_allow_html=True)
 
