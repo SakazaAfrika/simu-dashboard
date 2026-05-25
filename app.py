@@ -53,6 +53,12 @@ h1, h2, h3 { color: #ffffff !important; }
 hr { border-color: rgba(74,222,170,0.1); }
 input, input[type="text"], input[type="password"], input[type="email"] { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; caret-color: #4adeaa !important; }
 input:focus { background-color: #0d332c !important; color: #e8f5f1 !important; }
+div[data-baseweb="base-input"] { background-color: rgba(255,255,255,0.06) !important; border: 1px solid rgba(74,222,170,0.15) !important; border-radius: 6px !important; }
+div[data-baseweb="base-input"] input { color: #e8f5f1 !important; background: transparent !important; -webkit-text-fill-color: #e8f5f1 !important; }
+div[data-baseweb="base-input"] input::placeholder { color: rgba(232,245,241,0.3) !important; -webkit-text-fill-color: rgba(232,245,241,0.3) !important; }
+div[data-baseweb="base-input"] input:-webkit-autofill,
+div[data-baseweb="base-input"] input:-webkit-autofill:hover,
+div[data-baseweb="base-input"] input:-webkit-autofill:focus { -webkit-text-fill-color: #e8f5f1 !important; -webkit-box-shadow: 0 0 0px 1000px #0d332c inset !important; transition: background-color 5000s ease-in-out 0s; }
 textarea { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; border: 1px solid rgba(74,222,170,0.2) !important; border-radius: 8px !important; }
 textarea:focus { background-color: #0d332c !important; color: #e8f5f1 !important; }
 div[data-testid="stTextInput"] label, div[data-testid="stTextArea"] label { color: rgba(232,245,241,0.6) !important; font-size: 12px !important; }
@@ -150,6 +156,9 @@ def show_respondent_page(slug):
     .stButton button { background: #1d9e75 !important; color: #fff !important; font-size: 15px !important; padding: 14px !important; }
     .stFormSubmitButton button { background: #1d9e75 !important; color: #fff !important; font-size: 15px !important; }
     h1, h2, h3 { color: #1a3a32 !important; }
+    div[data-testid="stCheckbox"] label p { color: #1a3a32 !important; font-size: 14px !important; }
+    div[data-testid="stCheckbox"] label { color: #1a3a32 !important; }
+    div[data-testid="stCheckbox"] span[data-baseweb] { color: #1a3a32 !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -179,15 +188,26 @@ def show_respondent_page(slug):
         </div>
         """, unsafe_allow_html=True)
 
+
         prompts = []
-        if campaign and campaign.get('prompts'):
-            prompts = campaign['prompts']
-        else:
-            prompts = [
-                "Tell us what's happening in your community. What's the biggest challenge you face?",
-                "How has this affected you or your family?",
-                "What change would make the biggest difference?",
-            ]
+        if campaign:
+            raw = campaign.get("prompts")
+            if isinstance(raw, list) and raw:
+                prompts = raw
+            elif isinstance(raw, str) and raw.strip():
+                import json
+                try: prompts = json.loads(raw)
+                except: prompts = [raw]
+        if not prompts:
+            prompts = ["Tell us what's happening in your community. What's the biggest challenge you face?","How has this affected you or your family?","What change would make the biggest difference?"]
+
+
+
+
+
+
+
+
 
         with st.form("respondent_form"):
             st.markdown("""
