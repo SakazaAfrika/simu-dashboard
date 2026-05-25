@@ -13,6 +13,8 @@ st.set_page_config(page_title="simu · Dashboard", page_icon="🟢", layout="wid
 import os
 SUPABASE_URL = os.environ.get("SUPABASE_URL") or st.secrets.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY") or st.secrets.get("SUPABASE_KEY", "")
+if SUPABASE_URL and not SUPABASE_URL.startswith("http"):
+    SUPABASE_URL = f"https://{SUPABASE_URL}"
 BASE_URL = "http://localhost:8501"
 
 def get_auth_client():
