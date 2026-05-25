@@ -51,18 +51,18 @@ div[data-testid="stMetricValue"] { color: #ffffff !important; }
 div[data-testid="stMetricLabel"] { color: rgba(232,245,241,0.9) !important; font-size: 13px !important; }
 h1, h2, h3 { color: #ffffff !important; }
 hr { border-color: rgba(74,222,170,0.1); }
-input, input[type="text"], input[type="password"], input[type="email"] { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; caret-color: #4adeaa !important; }
+input, input[type="text"], input[type="password"], input[type="email"] { color: #e8f5f1 !important; background-color: #0d332c !important; caret-color: #4adeaa !important; }
 input:focus { background-color: #0d332c !important; color: #e8f5f1 !important; }
-div[data-baseweb="base-input"] { background-color: rgba(255,255,255,0.06) !important; border: 1px solid rgba(74,222,170,0.15) !important; border-radius: 6px !important; }
+div[data-baseweb="base-input"] { background-color: #0d332c !important; border: 1px solid rgba(74,222,170,0.2) !important; border-radius: 6px !important; }
 div[data-baseweb="base-input"] input { color: #e8f5f1 !important; background: transparent !important; -webkit-text-fill-color: #e8f5f1 !important; }
 div[data-baseweb="base-input"] input::placeholder { color: rgba(232,245,241,0.3) !important; -webkit-text-fill-color: rgba(232,245,241,0.3) !important; }
 div[data-baseweb="base-input"] input:-webkit-autofill,
 div[data-baseweb="base-input"] input:-webkit-autofill:hover,
 div[data-baseweb="base-input"] input:-webkit-autofill:focus { -webkit-text-fill-color: #e8f5f1 !important; -webkit-box-shadow: 0 0 0px 1000px #0d332c inset !important; transition: background-color 5000s ease-in-out 0s; }
-textarea { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; border: 1px solid rgba(74,222,170,0.2) !important; border-radius: 8px !important; }
+textarea { color: #e8f5f1 !important; background-color: #0d332c !important; border: 1px solid rgba(74,222,170,0.2) !important; border-radius: 8px !important; }
 textarea:focus { background-color: #0d332c !important; color: #e8f5f1 !important; }
 div[data-testid="stTextInput"] label, div[data-testid="stTextArea"] label { color: rgba(232,245,241,0.6) !important; font-size: 12px !important; }
-div[data-baseweb="base-input"], div[data-baseweb="base-input"] > div { background-color: rgba(255,255,255,0.04) !important; }
+div[data-baseweb="base-input"], div[data-baseweb="base-input"] > div { background-color: #0d332c !important; }
 div[data-baseweb="base-input"] input { color: #e8f5f1 !important; background: transparent !important; }
 div[data-baseweb="select"] div { color: #e8f5f1 !important; background-color: rgba(255,255,255,0.04) !important; }
 div[data-baseweb="select"] span { color: #e8f5f1 !important; }
