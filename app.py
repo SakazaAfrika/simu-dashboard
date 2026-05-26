@@ -174,8 +174,11 @@ def dashboard():
             result = supabase_request('GET',
                 f'campaigns?user_id=eq.{user_id}&order=created_at.desc',
                 token=session.get('access_token'))
+            print(f'[DEBUG] user_id: {user_id}')
+            print(f'[DEBUG] campaigns result: {result}')
             campaigns = result if isinstance(result, list) else []
-        except: pass
+        except Exception as e:
+            print(f'[DEBUG] campaigns error: {e}')
     return render_template('dashboard.html',
         campaigns=campaigns,
         user=user,
