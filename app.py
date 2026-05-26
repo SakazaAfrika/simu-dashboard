@@ -165,12 +165,7 @@ def show_landing():
             if st.button("Get started free",use_container_width=True): st.session_state.auth_page="signup"; st.rerun()
         with b2:
             if st.button("Log in",use_container_width=True): st.session_state.auth_page="login"; st.rerun()
-        st.markdown("<br>",unsafe_allow_html=True)
-        st.markdown("""<div style='display:flex;gap:32px;flex-wrap:wrap;'>
-        <div><div style='font-size:20px;font-weight:500;color:#4adeaa;'>20 to 200k</div><div style='font-size:11px;color:rgba(232,245,241,0.4);'>responses at any scale</div></div>
-        <div><div style='font-size:20px;font-weight:500;color:#4adeaa;'>4 channels</div><div style='font-size:11px;color:rgba(232,245,241,0.4);'>WhatsApp, SMS, Email, QR</div></div>
-        <div><div style='font-size:20px;font-weight:500;color:#4adeaa;'>99%</div><div style='font-size:11px;color:rgba(232,245,241,0.4);'>verified submissions</div></div>
-        </div>""",unsafe_allow_html=True)
+
 
 def show_signup():
     _,col,_ = st.columns([1,1.2,1])
@@ -379,16 +374,45 @@ def show_dashboard():
         if not isinstance(campaigns,list): campaigns=[]
     except: campaigns=[]
 
-    campaign_name=""; campaign_org=""
-    if campaigns:
-        campaign_name=campaigns[0].get("name",""); campaign_org=campaigns[0].get("organisation","")
-    elif st.session_state.current_campaign:
-        campaign_name=st.session_state.current_campaign.get("name",""); campaign_org=st.session_state.current_campaign.get("organisation","")
+    # Campaign switcher
+    campaign_names = [c.get("name","Untitled") for c in campaigns]
+    selected_idx = 0
+    with st.sidebar:
+        st.markdown(logo_html(24),unsafe_allow_html=True)
+        st.markdown('<div class="section-label">Navigation</div>',unsafe_allow_html=True)
+        page=st.radio("",["Overview","Responses","Voices","Map","Analytics","Reporting"],label_visibility="collapsed")
+        st.markdown("---")
+        if len(campaigns) > 1:
+            st.markdown('<div class="section-label">Campaign</div>',unsafe_allow_html=True)
+            selected_name = st.selectbox("", campaign_names, label_visibility="collapsed")
+            selected_idx = campaign_names.index(selected_name)
+        elif campaigns:
+            selected_idx = 0
+        st.markdown("---")
+        user_email=st.session_state.user.email if st.session_state.user else ""
+        st.markdown(f'<div style="font-size:11px;color:rgba(232,245,241,0.35);margin-bottom:8px;">{user_email}</div>',unsafe_allow_html=True)
+        if st.button("+ New campaign"): st.session_state.auth_page="create_campaign"; st.session_state.campaign_step=1; st.session_state.campaign_draft={}; st.rerun()
+        if st.button("Log out"): st.session_state.user=None; st.session_state.access_token=None; st.session_state.auth_page="landing"; st.rerun()
+
+    # Load selected campaign
+    selected_campaign = campaigns[selected_idx] if campaigns else {}
+    campaign_name = selected_campaign.get("name","")
+    campaign_org = selected_campaign.get("organisation","")
+    slug = selected_campaign.get("slug","")
+    campaign_link = f"{RESPOND_BASE}?c={slug}" if slug else ""
+
+    if campaign_name:
+        st.sidebar.markdown(f"""<div style='background:rgba(74,222,170,0.08);border:1px solid rgba(74,222,170,0.2);border-radius:8px;padding:12px 14px;margin-top:12px;'>
+        <div style='font-size:13px;font-weight:500;color:#e8f5f1;margin-bottom:3px;'>{campaign_name}</div>
+        <div style='font-size:11px;color:rgba(74,222,170,0.6);'>{campaign_org}</div>
+        <div style='margin-top:8px;'><span class='live-dot'></span><span style='font-size:11px;color:#4adeaa;font-weight:500;'>LIVE</span></div>
+        {f"<div style='margin-top:8px;font-size:10px;color:rgba(232,245,241,0.4);word-break:break-all;'>{campaign_link}</div>" if campaign_link else ""}
+        </div>""", unsafe_allow_html=True)
 
     real_responses=[]; has_real_data = False
-    if campaigns:
+    if selected_campaign:
         try:
-            cid = campaigns[0].get("id")
+            cid = selected_campaign.get("id")
             real_responses = supabase_request("GET", f"responses?campaign_id=eq.{cid}&order=submitted_at.desc", token=st.session_state.access_token)
             if isinstance(real_responses, list) and len(real_responses) > 0: has_real_data = True
         except: pass
@@ -400,26 +424,6 @@ def show_dashboard():
         if "verified" in df.columns: df = df.rename(columns={"verified":"Verified"})
     else:
         df = pd.DataFrame(columns=["ID","Location","Lat","Lon","Channel","Theme","Timestamp","Verified","Format"])
-
-    with st.sidebar:
-        st.markdown(logo_html(24),unsafe_allow_html=True)
-        st.markdown('<div class="section-label">Navigation</div>',unsafe_allow_html=True)
-        page=st.radio("",["Overview","Responses","Voices","Map","Analytics","Reporting"],label_visibility="collapsed")
-        st.markdown("---")
-        if campaign_name:
-            slug = campaigns[0].get("slug","") if campaigns else ""
-            campaign_link = f"{RESPOND_BASE}?c={slug}" if slug else ""
-            st.markdown(f"""<div style='background:rgba(74,222,170,0.08);border:1px solid rgba(74,222,170,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;'>
-            <div style='font-size:13px;font-weight:500;color:#e8f5f1;margin-bottom:3px;'>{campaign_name}</div>
-            <div style='font-size:11px;color:rgba(74,222,170,0.6);'>{campaign_org}</div>
-            <div style='margin-top:8px;'><span class='live-dot'></span><span style='font-size:11px;color:#4adeaa;font-weight:500;'>LIVE</span></div>
-            {f"<div style='margin-top:8px;font-size:10px;color:rgba(232,245,241,0.4);word-break:break-all;'>{campaign_link}</div>" if campaign_link else ""}
-            </div>""",unsafe_allow_html=True)
-        st.markdown("---")
-        user_email=st.session_state.user.email if st.session_state.user else ""
-        st.markdown(f'<div style="font-size:11px;color:rgba(232,245,241,0.35);margin-bottom:8px;">{user_email}</div>',unsafe_allow_html=True)
-        if st.button("+ New campaign"): st.session_state.auth_page="create_campaign"; st.session_state.campaign_step=1; st.session_state.campaign_draft={}; st.rerun()
-        if st.button("Log out"): st.session_state.user=None; st.session_state.access_token=None; st.session_state.auth_page="landing"; st.rerun()
 
     if page=="Overview":
         c1,c2=st.columns([3,1])
