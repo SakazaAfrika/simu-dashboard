@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}simu · New campaign{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;">
+<div style="max-width:560px;width:100%;">
+
+  <a href="/dashboard" class="logo" style="margin-bottom:32px;display:flex;">
+    <div class="logo-dot"></div>
+    <div style="margin-left:10px;">
+      <div class="logo-text">simu</div>
+      <div class="logo-sub">by Sakaza Afrika</div>
+    </div>
+  </a>
+
+  <form method="POST" id="campaignForm">
+    <!-- Hidden prompt accumulator -->
+    <div id="promptsHidden"></div>
+
+    <!-- Step 1: Basics -->
+    <div class="step" id="step1">
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <div style="height:3px;flex:1;border-radius:2px;background:var(--accent);"></div>
+        <div style="height:3px;flex:1;border-radius:2px;background:var(--border);"></div>
+        <div style="height:3px;flex:1;border-radius:2px;background:var(--border);"></div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:20px;">Step 1 of 3</p>
+      <h2 style="font-size:22px;font-weight:500;margin-bottom:4px;">Campaign basics</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:24px;">Name your campaign and tell us who it's for.</p>
+      <div class="field">
+        <label>Campaign name *</label>
+        <input type="text" name="name" placeholder="e.g. Community Water Access Survey" required>
+      </div>
+      <div class="field">
+        <label>Organisation *</label>
+        <input type="text" name="organisation" value="{{ user_org }}" placeholder="e.g. ActionAid Kenya" required>
+      </div>
+      <div class="field">
+        <label>What is this campaign about? *</label>
+        <textarea name="description" placeholder="Tell respondents why their voice matters." required></textarea>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Campaign type</label>
+          <select name="campaign_type">
+            <option>Community reporting</option>
+            <option>Audience callout</option>
+            <option>Qualitative research</option>
+            <option>Campaign storytelling</option>
+            <option>Needs assessment</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Target responses</label>
+          <select name="target_responses">
+            <option>20 - 200</option>
+            <option>200 - 2,000</option>
+            <option>2,000 - 20,000</option>
+            <option>20,000+</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary btn-full" onclick="goTo(2)">Next: Channels →</button>
+    </div>
+
+    <!-- Step 2: Channels -->
+    <div class="step" id="step2" style="display:none;">
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <div style="height:3px;flex:1;border-radius:2px;background:rgba(74,222,170,0.4);"></div>
+        <div style="height:3px;flex:1;border-radius:2px;background:var(--accent);"></div>
+        <div style="height:3px;flex:1;border-radius:2px;background:var(--border);"></div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:20px;">Step 2 of 3</p>
+      <h2 style="font-size:22px;font-weight:500;margin-bottom:4px;">Channels and formats</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:24px;">How will people reach simu?</p>
+
+      <p class="label" style="margin-bottom:10px;">Submission channels</p>
+      <div class="check-row">
+        <label class="check-item"><input type="checkbox" name="channels" value="WhatsApp" checked><span>WhatsApp</span></label>
+        <label class="check-item"><input type="checkbox" name="channels" value="SMS" checked><span>SMS</span></label>
+        <label class="check-item"><input type="checkbox" name="channels" value="Email" checked><span>Email</span></label>
+        <label class="check-item"><input type="checkbox" name="channels" value="QR Code"><span>QR Code</span></label>
+      </div>
+
+      <p class="label" style="margin-bottom:10px;margin-top:16px;">Accepted formats</p>
+      <div class="check-row">
+        <label class="check-item"><input type="checkbox" name="formats" value="Text" checked><span>Text</span></label>
+        <label class="check-item"><input type="checkbox" name="formats" value="Voice note" checked><span>Voice note</span></label>
+        <label class="check-item"><input type="checkbox" name="formats" value="Photo"><span>Photo</span></label>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="field">
+          <label>Language</label>
+          <select name="language">
+            <option>English</option><option>Swahili</option><option>French</option>
+            <option>Amharic</option><option>Zulu</option><option>Yoruba</option><option>Hausa</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Location tagging</label>
+          <select name="location_tagging">
+            <option>Required</option><option selected>Optional</option><option>Disabled</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2" style="gap:10px;">
+        <button type="button" class="btn btn-ghost btn-full" onclick="goTo(1)">← Back</button>
+        <button type="button" class="btn btn-primary btn-full" onclick="goTo(3)">Next: Story prompts →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Prompts -->
+    <div class="step" id="step3" style="display:none;">
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <div style="height:3px;flex:1;border-radius:2px;background:rgba(74,222,170,0.4);"></div>
+        <div style="height:3px;flex:1;border-radius:2px;background:rgba(74,222,170,0.4);"></div>
+        <div style="height:3px;flex:1;border-radius:2px;background:var(--accent);"></div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:20px;">Step 3 of 3</p>
+      <h2 style="font-size:22px;font-weight:500;margin-bottom:4px;">Story prompts</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:24px;">What do you want to ask respondents?</p>
+
+      <div id="promptList"></div>
+
+      <div style="display:flex;gap:8px;margin-bottom:20px;">
+        <input type="text" id="newPromptInput" placeholder="e.g. Where are you located?"
+          style="flex:1;padding:10px 14px;border-radius:7px;background:var(--surface);
+          border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;outline:none;">
+        <button type="button" class="btn btn-ghost" onclick="addPrompt()">Add</button>
+      </div>
+
+      <div class="field">
+        <label>Closing message</label>
+        <textarea name="closing_message" rows="2">Thank you — your voice will shape real decisions for your community.</textarea>
+      </div>
+
+      <div class="grid-2" style="gap:10px;">
+        <button type="button" class="btn btn-ghost btn-full" onclick="goTo(2)">← Back</button>
+        <button type="submit" class="btn btn-primary btn-full">Go live now →</button>
+      </div>
+    </div>
+  </form>
+</div>
+</div>
+
+<script>
+const defaultPrompts = [
+  "Tell us what's happening in your community. What's the biggest challenge you face every day?",
+  "How has this affected you or your family?"
+];
+let prompts = [...defaultPrompts];
+
+function renderPrompts() {
+  const list = document.getElementById('promptList');
+  const hidden = document.getElementById('promptsHidden');
+  list.innerHTML = '';
+  hidden.innerHTML = '';
+  prompts.forEach((p, i) => {
+    list.innerHTML += `
+      <div style="background:rgba(255,255,255,0.03);border-left:2px solid rgba(74,222,170,0.4);
+        border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:8px;display:flex;
+        justify-content:space-between;align-items:flex-start;gap:10px;">
+        <div>
+          <div style="font-size:10px;color:rgba(74,222,170,0.6);font-weight:500;margin-bottom:3px;">Q${i+1}</div>
+          <div style="font-size:13px;color:rgba(232,245,241,0.8);">${p}</div>
+        </div>
+        <button type="button" onclick="removePrompt(${i})"
+          style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
+      </div>`;
+    hidden.innerHTML += `<input type="hidden" name="prompts" value="${p.replace(/"/g,'&quot;')}">`;
+  });
+}
+
+function addPrompt() {
+  const input = document.getElementById('newPromptInput');
+  const val = input.value.trim();
+  if (val) { prompts.push(val); input.value = ''; renderPrompts(); }
+}
+
+function removePrompt(i) { prompts.splice(i, 1); renderPrompts(); }
+
+function goTo(n) {
+  document.querySelectorAll('.step').forEach(s => s.style.display = 'none');
+  document.getElementById('step' + n).style.display = 'block';
+}
+
+document.getElementById('newPromptInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addPrompt(); }
+});
+
+renderPrompts();
+</script>
+{% endblock %}
