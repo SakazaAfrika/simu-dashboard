@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}simu · Every voice has a channel{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;">
+  <div style="max-width:480px;width:100%;">
+    <div class="logo" style="margin-bottom:40px;">
+      <div class="logo-dot"></div>
+      <div>
+        <div class="logo-text">simu</div>
+        <div class="logo-sub">by Sakaza Afrika</div>
+      </div>
+    </div>
+    <div style="font-family:'DM Serif Display',serif;font-size:42px;font-weight:400;color:#fff;line-height:1.15;letter-spacing:-1px;margin-bottom:16px;">
+      Every voice<br>has a channel.
+    </div>
+    <p style="font-size:16px;color:var(--muted);line-height:1.65;margin-bottom:36px;">
+      Collect authentic community voices at scale — via WhatsApp, SMS, email or QR code.
+      Verified. Structured. Ready to use.
+    </p>
+    <div class="grid-2" style="gap:12px;">
+      <a href="/signup" class="btn btn-primary btn-full">Get started free</a>
+      <a href="/login"  class="btn btn-ghost  btn-full">Log in</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
