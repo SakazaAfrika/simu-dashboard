@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+{% block title %}simu · Dashboard{% endblock %}
+{% block head %}
+<style>
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: #0d332c;
+    border-right: 1px solid rgba(74,222,170,0.1);
+    padding: 24px 16px; display: flex; flex-direction: column; gap: 4px;
+    position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar .logo { margin-bottom: 24px; }
+  .nav-item {
+    padding: 9px 12px; border-radius: 7px; font-size: 14px; cursor: pointer;
+    color: var(--muted); transition: background 0.15s, color 0.15s;
+    display: block; text-decoration: none;
+  }
+  .nav-item:hover { background: rgba(74,222,170,0.06); color: var(--text); }
+  .nav-item.active { background: rgba(74,222,170,0.1); color: var(--text); }
+  .sidebar-divider { border: none; border-top: 1px solid rgba(74,222,170,0.1); margin: 12px 0; }
+  .campaign-pill {
+    background: rgba(74,222,170,0.08); border: 1px solid rgba(74,222,170,0.2);
+    border-radius: 8px; padding: 12px 14px; margin-top: 8px;
+  }
+
+  /* Main content */
+  .main { margin-left: 220px; padding: 32px; flex: 1; max-width: 1100px; }
+
+  /* Metrics grid */
+  .metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+  @media(max-width:900px) { .metrics { grid-template-columns: repeat(2,1fr); } }
+
+  /* Responses table */
+  .responses-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .responses-table th {
+    text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border);
+    color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .responses-table td { padding: 10px 14px; border-bottom: 1px solid rgba(74,222,170,0.06); }
+  .responses-table tr:hover td { background: rgba(74,222,170,0.03); }
+</style>
+{% endblock %}
+{% block body %}
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="/" class="logo">
+      <div class="logo-dot" style="width:20px;height:20px;"></div>
+      <div style="margin-left:8px;">
+        <div class="logo-text" style="font-size:17px;">simu</div>
+        <div class="logo-sub">by Sakaza Afrika</div>
+      </div>
+    </a>
+
+    <p class="label">Navigation</p>
+    <a class="nav-item active" onclick="showPage('overview')">Overview</a>
+    <a class="nav-item" onclick="showPage('responses')">Responses</a>
+    <a class="nav-item" onclick="showPage('voices')">Voices</a>
+    <a class="nav-item" onclick="showPage('analytics')">Analytics</a>
+    <a class="nav-item" onclick="showPage('reporting')">Reporting</a>
+
+    <hr class="sidebar-divider">
+    <p class="label">Campaign</p>
+    <select id="campaignSelect" onchange="switchCampaign()"
+      style="width:100%;padding:8px 10px;border-radius:7px;background:var(--bg);
+      border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;outline:none;">
+      {% for c in campaigns %}
+      <option value="{{ c.id }}" data-slug="{{ c.slug }}" data-name="{{ c.name }}" data-org="{{ c.organisation }}">
+        {{ c.name }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <div class="campaign-pill" id="campaignPill" style="display:{% if campaigns %}block{% else %}none{% endif %};">
+      <div id="pillName" style="font-size:13px;font-weight:500;margin-bottom:2px;">
+        {% if campaigns %}{{ campaigns[0].name }}{% endif %}
+      </div>
+      <div id="pillOrg" style="font-size:11px;color:rgba(74,222,170,0.6);">
+        {% if campaigns %}{{ campaigns[0].organisation }}{% endif %}
+      </div>
+      <div style="margin-top:6px;font-size:11px;color:var(--accent);font-weight:500;">
+        <span class="live-dot"></span>LIVE
+      </div>
+      <div id="pillLink" style="margin-top:6px;font-size:10px;color:var(--muted);word-break:break-all;">
+        {% if campaigns %}https://simubysakaza.com/respond.html?c={{ campaigns[0].slug }}{% endif %}
+      </div>
+    </div>
+
+    <hr class="sidebar-divider">
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">
+      {{ user.email if user and user.email else '' }}
+    </p>
+    <a href="/campaign/new" class="btn btn-ghost btn-sm" style="margin-bottom:8px;text-align:center;">+ New campaign</a>
+    <a href="/logout" class="btn btn-ghost btn-sm" style="text-align:center;">Log out</a>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ── Overview ── -->
+    <div id="page-overview">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+        <div>
+          <p class="label">Campaign overview</p>
+          <h1 id="overviewTitle" style="font-size:22px;font-weight:500;">
+            {% if campaigns %}{{ campaigns[0].name }}{% else %}Your dashboard{% endif %}
+          </h1>
+          <p id="overviewOrg" style="font-size:13px;color:var(--muted);">
+            {% if campaigns %}{{ campaigns[0].organisation }}{% endif %}
+          </p>
+        </div>
+        <div style="font-size:13px;color:var(--accent);font-weight:500;padding-top:6px;">
+          <span class="live-dot"></span>LIVE
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Total responses</div>
+          <div class="metric-value" id="metricTotal">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Channels</div>
+          <div class="metric-value" id="metricChannels">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Locations</div>
+          <div class="metric-value" id="metricLocations">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Latest response</div>
+          <div class="metric-value" id="metricLatest" style="font-size:14px;">—</div>
+        </div>
+      </div>
+
+      <div id="overviewEmpty" class="empty" style="display:none;">
+        <div class="empty-icon">📡</div>
+        <div class="empty-title">Waiting for voices</div>
+        <div class="empty-sub" id="emptyLink">Your campaign is live. Share the link to start collecting.</div>
+      </div>
+
+      <hr>
+      <p class="label" style="margin-bottom:12px;">Latest community voices</p>
+      <div id="latestVoices">
+        <div class="empty">
+          <div class="empty-icon">🎙️</div>
+          <div class="empty-title">No voices yet</div>
+          <div class="empty-sub">Responses will appear here as they come in.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Responses ── -->
+    <div id="page-responses" style="display:none;">
+      <p class="label">All responses</p>
+      <h1 id="responsesCount" style="font-size:22px;font-weight:500;margin-bottom:20px;">0 submissions</h1>
+      <div id="responsesEmpty" class="empty">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">No responses yet</div>
+        <div class="empty-sub">Submissions will appear here once people start responding.</div>
+      </div>
+      <div id="responsesTable" style="display:none;">
+        <table class="responses-table">
+          <thead>
+            <tr>
+              <th>Content</th><th>Channel</th><th>Location</th><th>Time</th><th>Verified</th>
+            </tr>
+          </thead>
+          <tbody id="responsesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Voices ── -->
+    <div id="page-voices" style="display:none;">
+      <p class="label">Community voices</p>
+      <h1 style="font-size:22px;font-weight:500;margin-bottom:20px;">Straight from the source.</h1>
+      <div id="voicesList">
+        <div class="empty">
+          <div class="empty-icon">🎙️</div>
+          <div class="empty-title">No voices yet</div>
+          <div class="empty-sub">Real responses will appear here as they come in.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Analytics ── -->
+    <div id="page-analytics" style="display:none;">
+      <p class="label">Analytics</p>
+      <h1 style="font-size:22px;font-weight:500;margin-bottom:20px;">Deep dive</h1>
+      <div id="analyticsEmpty" class="empty">
+        <div class="empty-icon">📊</div>
+        <div class="empty-title">No data yet</div>
+        <div class="empty-sub">Analytics will populate as responses come in.</div>
+      </div>
+      <div id="analyticsContent" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <p class="label" style="margin-bottom:12px;">By channel</p>
+            <div id="channelBreakdown"></div>
+          </div>
+          <div class="card">
+            <p class="label" style="margin-bottom:12px;">Response formats</p>
+            <div id="formatBreakdown"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Reporting ── -->
+    <div id="page-reporting" style="display:none;">
+      <p class="label">Reporting</p>
+      <h1 style="font-size:22px;font-weight:500;margin-bottom:20px;">Export your data</h1>
+      <div id="reportingEmpty" class="empty">
+        <div class="empty-icon">📥</div>
+        <div class="empty-title">No data to export yet</div>
+        <div class="empty-sub">Once responses come in you can download them as a CSV.</div>
+      </div>
+      <div id="reportingContent" style="display:none;">
+        <div class="card" style="margin-bottom:16px;">
+          <p style="font-size:13px;font-weight:500;color:var(--accent);margin-bottom:6px;">CSV Export</p>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+            Download all responses as a spreadsheet.
+          </p>
+          <button class="btn btn-primary" onclick="downloadCSV()">Download CSV</button>
+        </div>
+      </div>
+    </div>
+
+    {% if not campaigns %}
+    <!-- No campaigns at all -->
+    <div class="empty" style="margin-top:40px;">
+      <div class="empty-icon">🚀</div>
+      <div class="empty-title">No campaigns yet</div>
+      <div class="empty-sub">Create your first campaign to start collecting voices.</div>
+      <a href="/campaign/new" class="btn btn-primary" style="margin-top:20px;">Create campaign</a>
+    </div>
+    {% endif %}
+
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = "{{ supabase_url }}";
+const SUPABASE_KEY = "{{ supabase_key }}";
+const RESPOND_BASE = "{{ respond_base }}";
+
+let currentCampaignId = "{{ campaigns[0].id if campaigns else '' }}";
+let currentSlug       = "{{ campaigns[0].slug if campaigns else '' }}";
+let allResponses      = [];
+
+// ── Fetch responses ──────────────────────────────────────────────────────────
+async function fetchResponses(campaignId) {
+  if (!campaignId) return [];
+  const r = await fetch(`/api/responses/${campaignId}`);
+  return r.ok ? await r.json() : [];
+}
+
+// ── Render data ──────────────────────────────────────────────────────────────
+function renderAll(responses) {
+  allResponses = responses;
+  const has = responses.length > 0;
+  const link = `${RESPOND_BASE}?c=${currentSlug}`;
+
+  // Metrics
+  document.getElementById('metricTotal').textContent = has ? responses.length : '0';
+  const channels = [...new Set(responses.map(r => r.channel).filter(Boolean))];
+  document.getElementById('metricChannels').textContent = has ? channels.length : '—';
+  const locs = responses.filter(r => r.location).length;
+  document.getElementById('metricLocations').textContent = has ? locs : '—';
+  if (has) {
+    const latest = responses[0].submitted_at;
+    document.getElementById('metricLatest').textContent = latest
+      ? new Date(latest).toLocaleDateString() : '—';
+  }
+
+  // Overview empty state
+  document.getElementById('overviewEmpty').style.display = has ? 'none' : 'block';
+  document.getElementById('emptyLink').textContent = `Your campaign is live: ${link}`;
+
+  // Latest voices
+  const voicesEl = document.getElementById('latestVoices');
+  if (has) {
+    voicesEl.innerHTML = responses.slice(0,4).map(r => `
+      <div class="voice-card">
+        <div class="voice-text">"${r.content || '(no text)'}"</div>
+        <div class="voice-meta">
+          ${r.location || 'Unknown location'}
+          <span class="badge" style="margin-left:8px;">${r.channel || 'Web'}</span>
+          ${r.verified ? ' · Verified' : ''}
+        </div>
+      </div>`).join('');
+  }
+
+  // Responses page
+  document.getElementById('responsesCount').textContent = `${responses.length} submissions`;
+  document.getElementById('responsesEmpty').style.display = has ? 'none' : 'block';
+  document.getElementById('responsesTable').style.display = has ? 'block' : 'none';
+  if (has) {
+    document.getElementById('responsesBody').innerHTML = responses.map(r => `
+      <tr>
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ${r.content || '—'}
+        </td>
+        <td><span class="badge">${r.channel || 'Web'}</span></td>
+        <td>${r.location || '—'}</td>
+        <td style="color:var(--muted);font-size:12px;">
+          ${r.submitted_at ? new Date(r.submitted_at).toLocaleString() : '—'}
+        </td>
+        <td>${r.verified ? '✓' : '—'}</td>
+      </tr>`).join('');
+  }
+
+  // Voices page
+  document.getElementById('voicesList').innerHTML = has
+    ? responses.slice(0,20).map(r => `
+        <div class="voice-card">
+          <div class="voice-text">"${r.content || '(no text)'}"</div>
+          <div class="voice-meta">
+            ${r.location || 'Unknown'}
+            <span class="badge" style="margin-left:8px;">${r.channel || 'Web'}</span>
+          </div>
+        </div>`).join('')
+    : `<div class="empty"><div class="empty-icon">🎙️</div>
+       <div class="empty-title">No voices yet</div>
+       <div class="empty-sub">Real responses will appear here as they come in.</div></div>`;
+
+  // Analytics
+  document.getElementById('analyticsEmpty').style.display = has ? 'none' : 'block';
+  document.getElementById('analyticsContent').style.display = has ? 'block' : 'none';
+  if (has) {
+    const chanCounts = {};
+    responses.forEach(r => { chanCounts[r.channel || 'Web'] = (chanCounts[r.channel || 'Web'] || 0) + 1; });
+    document.getElementById('channelBreakdown').innerHTML = Object.entries(chanCounts)
+      .map(([k,v]) => `
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+            <span>${k}</span><span style="color:var(--accent)">${Math.round(v/responses.length*100)}%</span>
+          </div>
+          <div style="height:4px;background:var(--border);border-radius:2px;">
+            <div style="height:4px;background:var(--accent);border-radius:2px;width:${v/responses.length*100}%"></div>
+          </div>
+        </div>`).join('');
+  }
+
+  // Reporting
+  document.getElementById('reportingEmpty').style.display = has ? 'none' : 'block';
+  document.getElementById('reportingContent').style.display = has ? 'block' : 'none';
+}
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+function showPage(name) {
+  ['overview','responses','voices','analytics','reporting'].forEach(p => {
+    document.getElementById(`page-${p}`).style.display = p === name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('onclick')?.includes(name));
+  });
+}
+
+// ── Campaign switcher ────────────────────────────────────────────────────────
+async function switchCampaign() {
+  const sel = document.getElementById('campaignSelect');
+  const opt = sel.options[sel.selectedIndex];
+  currentCampaignId = opt.value;
+  currentSlug       = opt.dataset.slug;
+  document.getElementById('pillName').textContent = opt.dataset.name;
+  document.getElementById('pillOrg').textContent  = opt.dataset.org;
+  document.getElementById('pillLink').textContent = `https://simubysakaza.com/respond.html?c=${currentSlug}`;
+  document.getElementById('overviewTitle').textContent = opt.dataset.name;
+  document.getElementById('overviewOrg').textContent   = opt.dataset.org;
+  const responses = await fetchResponses(currentCampaignId);
+  renderAll(responses);
+}
+
+// ── CSV export ───────────────────────────────────────────────────────────────
+function downloadCSV() {
+  if (!allResponses.length) return;
+  const headers = Object.keys(allResponses[0]);
+  const rows = allResponses.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'simu_responses.csv';
+  a.click();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+(async () => {
+  if (currentCampaignId) {
+    const responses = await fetchResponses(currentCampaignId);
+    renderAll(responses);
+  }
+})();
+</script>
+{% endblock %}
