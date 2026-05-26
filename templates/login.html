@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}simu · Log in{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;">
+  <div style="max-width:400px;width:100%;">
+    <a href="/" class="logo" style="margin-bottom:32px;display:flex;">
+      <div class="logo-dot"></div>
+      <div style="margin-left:10px;">
+        <div class="logo-text">simu</div>
+        <div class="logo-sub">by Sakaza Afrika</div>
+      </div>
+    </a>
+    <h1 style="font-size:22px;font-weight:500;margin-bottom:4px;">Welcome back</h1>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:24px;">Log in to your simu account</p>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" name="email" placeholder="you@organisation.com" required autofocus>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Your password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px;">Log in</button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--muted);">
+      <a href="/reset-password">Forgot your password?</a>
+    </p>
+    <p style="text-align:center;margin-top:12px;font-size:13px;color:var(--muted);">
+      Don't have an account? <a href="/signup">Sign up free</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
