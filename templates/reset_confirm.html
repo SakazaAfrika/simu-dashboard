@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}simu · Set new password{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;">
+<div style="max-width:400px;width:100%;">
+  <a href="/" class="logo" style="margin-bottom:32px;display:flex;">
+    <div class="logo-dot"></div>
+    <div style="margin-left:10px;"><div class="logo-text">simu</div><div class="logo-sub">by Sakaza Afrika</div></div>
+  </a>
+  <h1 style="font-size:22px;font-weight:500;margin-bottom:4px;">Set new password</h1>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:24px;">Choose a new password for your account.</p>
+  {% if error %}
+  <div class="alert alert-error">{{ error }}</div>
+  {% endif %}
+  <form method="POST">
+    <input type="hidden" name="token" value="{{ token }}">
+    <div class="field">
+      <label>New password</label>
+      <input type="password" name="password" placeholder="At least 8 characters" required minlength="8">
+    </div>
+    <div class="field">
+      <label>Confirm password</label>
+      <input type="password" name="confirm" placeholder="Repeat your new password" required>
+    </div>
+    <button type="submit" class="btn btn-primary btn-full">Set new password</button>
+  </form>
+</div>
+</div>
+{% endblock %}
