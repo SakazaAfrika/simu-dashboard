@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}simu · by Sakaza Afrika{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0a2a24;
+    --surface:  #0d332c;
+    --border:   rgba(74,222,170,0.15);
+    --accent:   #4adeaa;
+    --accent2:  #6be8bc;
+    --text:     #e8f5f1;
+    --muted:    rgba(232,245,241,0.45);
+    --faint:    rgba(232,245,241,0.25);
+    --font:     'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Logo */
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-dot { width: 22px; height: 22px; background: var(--accent);
+    border-radius: 50%; box-shadow: 0 0 10px rgba(74,222,170,0.5); flex-shrink: 0; }
+  .logo-text { font-size: 20px; font-weight: 300; letter-spacing: -0.5px; color: #fff; }
+  .logo-sub  { font-size: 10px; color: rgba(74,222,170,0.6); letter-spacing: 0.5px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 20px; border-radius: 8px; font-family: var(--font);
+    font-size: 14px; font-weight: 600; cursor: pointer; border: none;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--accent); color: #0a2a24; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost   { background: rgba(255,255,255,0.07); color: var(--text); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.12); }
+  .btn-full    { width: 100%; }
+  .btn-sm      { padding: 7px 14px; font-size: 13px; }
+
+  /* Form fields */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 10px 14px; border-radius: 7px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font); font-size: 14px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    border-color: rgba(74,222,170,0.5);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field select { appearance: none; cursor: pointer; }
+
+  /* Checkbox row */
+  .check-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  .check-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .check-item input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
+  .check-item span { font-size: 14px; color: var(--text); }
+
+  /* Cards / surfaces */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px;
+  }
+
+  /* Alert */
+  .alert { padding: 10px 14px; border-radius: 7px; font-size: 13px; margin-bottom: 16px; }
+  .alert-error   { background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
+  .alert-success { background: rgba(74,222,170,0.1); color: var(--accent); border: 1px solid var(--border); }
+
+  /* Section label */
+  .label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    color: rgba(74,222,170,0.5); margin-bottom: 4px; }
+
+  /* Live dot */
+  .live-dot { display: inline-block; width: 7px; height: 7px; background: var(--accent);
+    border-radius: 50%; margin-right: 5px; }
+
+  /* Empty state */
+  .empty {
+    background: rgba(74,222,170,0.04); border: 1px dashed rgba(74,222,170,0.2);
+    border-radius: 12px; padding: 48px 32px; text-align: center; margin: 24px 0;
+  }
+  .empty-icon  { font-size: 32px; margin-bottom: 14px; }
+  .empty-title { font-size: 17px; font-weight: 500; margin-bottom: 6px; }
+  .empty-sub   { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Voice card */
+  .voice-card {
+    background: var(--surface); border-left: 3px solid rgba(74,222,170,0.5);
+    border-top: 1px solid var(--border); border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 10px;
+  }
+  .voice-text { font-size: 14px; color: rgba(232,245,241,0.85); line-height: 1.6; margin-bottom: 6px; }
+  .voice-meta { font-size: 11px; color: var(--faint); }
+  .badge { background: rgba(74,222,170,0.1); color: rgba(74,222,170,0.8);
+    padding: 1px 8px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+
+  /* Metric card */
+  .metric { background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 20px; }
+  .metric-label { font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 6px; }
+  .metric-value { font-size: 28px; font-weight: 500; color: #fff; }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* Responsive grid helpers */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+  @media(max-width:640px) { .grid-2, .grid-4 { grid-template-columns: 1fr; } }
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+{% block body %}{% endblock %}
+</body>
+</html>
