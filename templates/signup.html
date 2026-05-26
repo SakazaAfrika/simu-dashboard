@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}simu · Create account{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;">
+  <div style="max-width:400px;width:100%;">
+    <a href="/" class="logo" style="margin-bottom:32px;display:flex;">
+      <div class="logo-dot"></div>
+      <div style="margin-left:10px;">
+        <div class="logo-text">simu</div>
+        <div class="logo-sub">by Sakaza Afrika</div>
+      </div>
+    </a>
+    <h1 style="font-size:22px;font-weight:500;margin-bottom:4px;">Create your account</h1>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:24px;">Start collecting voices today.</p>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+      <div class="field">
+        <label>Full name</label>
+        <input type="text" name="name" placeholder="Nelisa Dube" required>
+      </div>
+      <div class="field">
+        <label>Organisation</label>
+        <input type="text" name="organisation" placeholder="Sakaza Afrika" required>
+      </div>
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" name="email" placeholder="you@organisation.com" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="At least 8 characters" required minlength="8">
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px;">Create account</button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--muted);">
+      Already have an account? <a href="/login">Log in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
