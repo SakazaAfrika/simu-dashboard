@@ -17,6 +17,8 @@ if SUPABASE_URL and not SUPABASE_URL.startswith("http"):
     SUPABASE_URL = f"https://{SUPABASE_URL}"
 BASE_URL = "http://localhost:8501"
 
+RESPOND_BASE = "https://simubysakaza.com/respond.html"
+
 def get_auth_client():
     return SyncGoTrueClient(url=f"{SUPABASE_URL}/auth/v1", headers={"apikey": SUPABASE_KEY}, storage=SyncMemoryStorage())
 
@@ -143,169 +145,6 @@ def step_bar(current, total=3):
         else: cls = "step-pip"
         pips += f"<div class='{cls}'></div>"
     return f"<div class='step-bar'>{pips}</div><div style='font-size:11px;color:rgba(232,245,241,0.4);margin-bottom:20px;'>Step {current} of {total}</div>"
-
-def show_respondent_page(slug):
-    st.markdown("""
-    <style>
-    .stApp { background-color: #f0faf6 !important; color: #1a3a32 !important; }
-    section[data-testid="stSidebar"] { display: none !important; }
-    div[data-testid="stTextInput"] input { background: #fff !important; border: 1px solid #c8ead8 !important; color: #1a3a32 !important; }
-    div[data-baseweb="base-input"] { background: #fff !important; }
-    div[data-baseweb="base-input"] input { color: #1a3a32 !important; }
-    textarea { background: #fff !important; color: #1a3a32 !important; border: 1px solid #c8ead8 !important; }
-    .stButton button { background: #1d9e75 !important; color: #fff !important; font-size: 15px !important; padding: 14px !important; }
-    .stFormSubmitButton button { background: #1d9e75 !important; color: #fff !important; font-size: 15px !important; }
-    h1, h2, h3 { color: #1a3a32 !important; }
-    div[data-testid="stCheckbox"] label p { color: #1a3a32 !important; font-size: 14px !important; }
-    div[data-testid="stCheckbox"] label { color: #1a3a32 !important; }
-    div[data-testid="stCheckbox"] span[data-baseweb] { color: #1a3a32 !important; }
-    </style>
-    """, unsafe_allow_html=True)
-
-    campaign = None
-    try:
-        result = supabase_request("GET", f"campaigns?slug=eq.{slug}&is_live=eq.true")
-        if isinstance(result, list) and result:
-            campaign = result[0]
-    except:
-        pass
-
-    _,col,_ = st.columns([1,2,1])
-    with col:
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown(f"""
-        <div style='text-align:center;margin-bottom:32px;'>
-            <div style='width:44px;height:44px;background:#1d9e75;border-radius:50%;margin:0 auto 14px;'></div>
-            <div style='font-size:13px;color:#1d9e75;font-weight:500;letter-spacing:0.5px;margin-bottom:6px;'>
-                {campaign.get('organisation','') if campaign else 'simu by Sakaza Afrika'}
-            </div>
-            <div style='font-size:26px;font-weight:600;color:#1a3a32;letter-spacing:-0.5px;margin-bottom:8px;'>
-                {campaign.get('name','Share your voice') if campaign else 'Share your voice'}
-            </div>
-            <div style='font-size:14px;color:#4a7a6a;line-height:1.6;max-width:400px;margin:0 auto;'>
-                {campaign.get('description','Your voice matters. Share your experience and help shape decisions for your community.') if campaign else 'Your voice matters. Share your experience and help shape decisions for your community.'}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-        prompts = []
-        if campaign:
-            raw = campaign.get("prompts")
-            if isinstance(raw, list) and raw:
-                prompts = raw
-            elif isinstance(raw, str) and raw.strip():
-                import json
-                try: prompts = json.loads(raw)
-                except: prompts = [raw]
-        if not prompts:
-            prompts = ["Tell us what's happening in your community. What's the biggest challenge you face?","How has this affected you or your family?","What change would make the biggest difference?"]
-
-
-
-
-
-
-
-
-
-        with st.form("respondent_form"):
-            st.markdown("""
-            <div style='background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;border:1px solid #d8f0e8;'>
-                <div style='font-size:13px;font-weight:500;color:#1d9e75;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:16px;'>Your story</div>
-            """, unsafe_allow_html=True)
-
-            answers = []
-            for i, prompt in enumerate(prompts):
-                st.markdown(f"""
-                <div style='margin-bottom:6px;'>
-                    <span style='font-size:12px;font-weight:600;color:#1d9e75;'>Q{i+1}</span>
-                    <span style='font-size:14px;font-weight:500;color:#1a3a32;margin-left:8px;'>{prompt}</span>
-                </div>
-                """, unsafe_allow_html=True)
-                answer = st.text_area("", placeholder="Write your answer here...", key=f"q_{i}", label_visibility="collapsed")
-                answers.append(answer)
-                st.markdown("<br>", unsafe_allow_html=True)
-
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            st.markdown("""
-            <div style='background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #d8f0e8;'>
-                <div style='font-size:13px;font-weight:500;color:#1d9e75;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;'>Your location</div>
-            """, unsafe_allow_html=True)
-            location = st.text_input("Town, county or region", placeholder="e.g. Kisumu, Kenya", label_visibility="visible")
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            st.markdown("""
-            <div style='background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #d8f0e8;'>
-                <div style='font-size:13px;font-weight:500;color:#1d9e75;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;'>Contact details</div>
-                <div style='font-size:12px;color:#6a9a8a;margin-bottom:14px;'>Optional — but helps us follow up and grow our community.</div>
-            """, unsafe_allow_html=True)
-            contact_name = st.text_input("Full name", placeholder="e.g. Amina Wanjiru", label_visibility="visible")
-            col_ph, col_em = st.columns(2)
-            with col_ph:
-                phone = st.text_input("Phone number", placeholder="e.g. +254 700 000 000", label_visibility="visible")
-            with col_em:
-                email = st.text_input("Email address", placeholder="e.g. amina@email.com", label_visibility="visible")
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            st.markdown("""
-            <div style='background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid #d8f0e8;'>
-                <div style='font-size:13px;font-weight:500;color:#1d9e75;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;'>Permissions <span style='color:#e05a5a;'>*</span></div>
-            """, unsafe_allow_html=True)
-
-            org_name = campaign.get('organisation', 'the campaign team') if campaign else 'the campaign team'
-            perm_media = st.checkbox(f"I give permission for my story, photos, and voice recordings to be used and shared by {org_name} for campaign and advocacy purposes.", value=False)
-            perm_contact = st.checkbox(f"I agree to be contacted by {org_name} about this campaign and related updates. I can opt out at any time.", value=False)
-            st.markdown("""
-            <div style='font-size:11px;color:#8aaa9a;margin-top:10px;line-height:1.6;'>
-                Your data is handled in accordance with applicable data protection laws including POPIA and GDPR.
-            </div></div>
-            """, unsafe_allow_html=True)
-
-            st.markdown("""
-            <div style='background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #d8f0e8;'>
-                <div style='font-size:13px;font-weight:500;color:#1d9e75;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;'>Verify you are a real person</div>
-                <div style='font-size:12px;color:#6a9a8a;margin-bottom:14px;'>Take a quick selfie. It will not be stored — just used to confirm there is a real person behind this story.</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            selfie = st.camera_input("", label_visibility="collapsed")
-            submitted = st.form_submit_button("Submit my story", use_container_width=True)
-
-        if submitted:
-            if not any(answers) or not location:
-                st.error("Please answer at least one question and share your location.")
-            elif not perm_media or not perm_contact:
-                st.error("Please tick both permission boxes before submitting.")
-            else:
-                if campaign:
-                    try:
-                        response_data = {
-                            "campaign_id": campaign['id'],
-                            "respondent_id": contact_name if contact_name else f"Anon #{random.randint(1000,9999)}",
-                            "location": location,
-                            "content": " | ".join([f"Q{i+1}: {a}" for i,a in enumerate(answers) if a]),
-                            "channel": "Web link",
-                            "verified": selfie is not None,
-                            "format": "Text",
-                        }
-                        supabase_request("POST", "responses", response_data)
-                        if contact_name or phone or email:
-                            contact_data = {"campaign_id": campaign['id'], "name": contact_name, "phone": phone, "email": email, "location": location, "perm_media": perm_media, "perm_contact": perm_contact}
-                            supabase_request("POST", "contacts", contact_data)
-                    except:
-                        pass
-
-                st.markdown("""
-                <div style='background:#1d9e75;border-radius:12px;padding:28px;text-align:center;margin-top:16px;'>
-                    <div style='font-size:32px;margin-bottom:12px;'>&#10003;</div>
-                    <div style='font-size:20px;font-weight:600;color:#fff;margin-bottom:8px;'>Thank you.</div>
-                    <div style='font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;'>Your voice has been received and verified.</div>
-                </div>
-                """, unsafe_allow_html=True)
-
-        st.markdown("""<div style='text-align:center;margin-top:24px;font-size:14px;font-weight:500;color:#1d9e75;'>simu by Sakaza Afrika</div>""", unsafe_allow_html=True)
 
 def show_reset_password():
     _,col,_ = st.columns([1,1.2,1])
@@ -533,7 +372,7 @@ def show_launch_confirmation():
     campaign = st.session_state.current_campaign or {}
     name = campaign.get("name","Your campaign")
     slug = campaign.get("slug","your-campaign")
-    live_link = f"https://app.simubysakaza.com/?c={slug}"
+    live_link = f"{RESPOND_BASE}?c={slug}"
 
     _,col,_ = st.columns([1,2,1])
     with col:
@@ -590,7 +429,7 @@ def show_dashboard():
         st.markdown("---")
         if campaign_name:
             slug = campaigns[0].get("slug","") if campaigns else ""
-            campaign_link = f"https://app.simubysakaza.com/?c={slug}" if slug else ""
+            campaign_link = f"{RESPOND_BASE}?c={slug}" if slug else ""
             st.markdown(f"""<div style='background:rgba(74,222,170,0.08);border:1px solid rgba(74,222,170,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;'>
             <div style='font-size:13px;font-weight:500;color:#e8f5f1;margin-bottom:3px;'>{campaign_name}</div>
             <div style='font-size:11px;color:rgba(74,222,170,0.6);'>{campaign_org}</div>
@@ -776,9 +615,7 @@ try:
             st.session_state.auth_page = "reset_password"
 except: pass
 
-if "c" in params:
-    show_respondent_page(params["c"])
-elif st.session_state.auth_page == "reset_password":
+if st.session_state.auth_page == "reset_password":
     show_reset_password()
 elif st.session_state.user is None:
     if st.session_state.auth_page=="signup": show_signup()
