@@ -1,6 +1,7 @@
-streamlit>=1.32.0
+flask>=3.0.0
 pandas>=2.0.0
 plotly>=5.18.0
 numpy>=1.26.0
-gotrue==2.12.4 
-httpx==0.28.1 
+httpx==0.28.1
+gunicorn>=21.0.0
+africastalking>=1.0.0
