@@ -175,7 +175,7 @@ function renderPrompts() {
 function addPrompt() {
   const input = document.getElementById('newPromptInput');
   const val = input.value.trim();
-  if (val) { prompts.push(val); input.value = ''; document.addEventListener('DOMContentLoaded', renderPrompts); }
+  if (val) { prompts.push(val); input.value = ''; renderPrompts(); }
 }
 
 function removePrompt(i) { prompts.splice(i, 1); renderPrompts(); }
