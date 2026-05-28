@@ -362,7 +362,87 @@ def whatsapp_webhook():
 
     return twiml_msg(reply)
 
+# --- Campaign QR page (simu) ---
 
+QR_PAGE_HTML = r'''<!doctype html><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<style>
+:root{--mint:#5DCAA5;--charcoal:#1F2937;--offwhite:#F8FAF8;--tint1:#E8F7F1;--grey:#6B7280;--line:#e2efe9}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:radial-gradient(900px 520px at 88% -10%,rgba(93,202,165,.18),transparent 62%),var(--offwhite);color:var(--charcoal);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 24px}
+.wrap{width:100%;max-width:980px;display:grid;grid-template-columns:1fr 1.05fr;gap:34px}
+@media(max-width:780px){.wrap{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:30px;box-shadow:0 24px 60px -34px rgba(31,41,55,.28)}
+.brand{display:flex;flex-direction:column;gap:2px;margin-bottom:22px}
+.brand .row{display:flex;align-items:center;gap:12px}
+.brand .dot{width:26px;height:26px;border-radius:50%;background:var(--mint)}
+.brand .name{font-weight:800;font-size:36px;letter-spacing:-.01em}
+.brand .by{font-size:13px;color:var(--grey);margin-left:38px}
+h1{font-weight:800;font-size:27px;line-height:1.14;margin-bottom:8px}h1 span{color:var(--mint)}
+.sub{font-size:14.5px;color:var(--grey);line-height:1.55;margin-bottom:24px;font-weight:500}
+label{display:block;font-weight:700;font-size:13px;margin:18px 0 7px}
+input{width:100%;font-family:'Nunito';font-weight:500;font-size:15px;color:var(--charcoal);background:var(--offwhite);border:1px solid var(--line);border-radius:12px;padding:13px 14px;outline:none}
+input:focus{border-color:var(--mint);box-shadow:0 0 0 3px rgba(93,202,165,.22)}
+button{margin-top:26px;width:100%;font-family:'Nunito';font-weight:800;font-size:16px;color:var(--charcoal);background:var(--mint);border:none;border-radius:12px;padding:15px;cursor:pointer;box-shadow:0 12px 26px -12px rgba(93,202,165,.95)}
+button:hover{filter:brightness(1.03)}
+.preview{display:flex;flex-direction:column;align-items:center;gap:16px}
+.canvas-frame{width:100%;border-radius:22px;overflow:hidden;box-shadow:0 30px 70px -34px rgba(31,41,55,.4)}
+canvas{width:100%;display:block;height:auto}
+.hint{font-size:12.5px;color:var(--grey);text-align:center;font-weight:500}
+</style>
+<div class="wrap">
+<div class="panel">
+<div class="brand"><div class="row"><span class="dot"></span><span class="name">simu</span></div><span class="by">by Sakaza Afrika</span></div>
+<h1>Campaign <span>QR code</span></h1>
+<p class="sub">Download a print-ready code for posters, flyers and community gatherings — no typing, no app, just scan.</p>
+<label for="name">Campaign name</label>
+<input id="name" type="text" value="Join simu">
+<label for="link">Campaign link</label>
+<input id="link" type="text" value="https://simubysakaza.com/respond.html?c=join-simu-1758">
+<label for="tag">Call to action</label>
+<input id="tag" type="text" value="Scan to share your voice">
+<button id="dl">Download PNG</button>
+</div>
+<div class="preview"><div class="canvas-frame"><canvas id="card" width="820" height="1060"></canvas></div>
+<p class="hint">Live preview — downloads at high resolution for print.</p></div>
+</div>
+<script>
+const cv=document.getElementById('card'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);
+const params=new URLSearchParams(window.location.search);
+if(params.get('c'))$('link').value='https://simubysakaza.com/respond.html?c='+params.get('c');
+if(params.get('name'))$('name').value=params.get('name');
+function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function draw(){
+const W=cv.width,H=cv.height,name=$('name').value.trim()||'Campaign',link=$('link').value.trim(),tag=$('tag').value.trim()||'Scan to share your voice';
+ctx.fillStyle='#F8FAF8';ctx.fillRect(0,0,W,H);
+const glow=ctx.createRadialGradient(W*0.86,80,30,W*0.86,80,440);glow.addColorStop(0,'rgba(93,202,165,.22)');glow.addColorStop(1,'rgba(93,202,165,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+ctx.fillStyle='rgba(93,202,165,.08)';ctx.beginPath();ctx.arc(70,H-50,230,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle='rgba(93,202,165,.6)';ctx.lineWidth=3;roundRect(ctx,32,32,W-64,H-64,30);ctx.stroke();
+ctx.textAlign='left';ctx.font='800 76px Nunito';const wm='simu',tw=ctx.measureText(wm).width,dotR=25,gap=22,baseY=172,total=dotR*2+gap+tw,sx=(W-total)/2;
+ctx.fillStyle='#5DCAA5';ctx.beginPath();ctx.arc(sx+dotR,baseY-24,dotR,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#1F2937';ctx.fillText(wm,sx+dotR*2+gap,baseY);
+ctx.textAlign='center';ctx.fillStyle='#6B7280';ctx.font='500 20px Nunito';ctx.fillText('by Sakaza Afrika',W/2,baseY+34);
+ctx.strokeStyle='rgba(93,202,165,.65)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W/2-80,238);ctx.lineTo(W/2+80,238);ctx.stroke();
+ctx.fillStyle='#1F2937';ctx.font='700 38px Nunito';
+(function(t,x,y,mw,lh){const ws=t.split(' ');let ln='',ls=[];for(const w of ws){const tt=ln?ln+' '+w:w;if(ctx.measureText(tt).width>mw&&ln){ls.push(ln);ln=w;}else ln=tt;}ls.push(ln);const sy=y-((ls.length-1)*lh)/2;ls.forEach((l,i)=>ctx.fillText(l,x,sy+i*lh));})(name,W/2,302,W-200,46);
+const pY=364,pS=400,pX=(W-pS)/2;
+ctx.fillStyle='#E8F7F1';roundRect(ctx,pX-16,pY-16,pS+32,pS+32,30);ctx.fill();
+ctx.fillStyle='#fff';ctx.shadowColor='rgba(31,41,55,.16)';ctx.shadowBlur=30;ctx.shadowOffsetY=12;roundRect(ctx,pX,pY,pS,pS,24);ctx.fill();ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+if(link){const qr=new QRious({value:link,size:640,level:'H',background:'#ffffff',foreground:'#1F2937'});const q=322;ctx.drawImage(qr.canvas,(W-q)/2,pY+(pS-q)/2,q,q);}
+ctx.fillStyle='#1F2937';ctx.font='700 31px Nunito';ctx.textAlign='center';ctx.fillText(tag,W/2,pY+pS+90);
+ctx.fillStyle='#6B7280';ctx.font='500 16px Nunito';ctx.fillText('No app needed \u00b7 Scan with your camera',W/2,pY+pS+128);
+}
+function download(){const a=document.createElement('a');a.download='simu-qr-'+(($('name').value.trim()||'campaign').toLowerCase().replace(/[^a-z0-9]+/g,'-'))+'.png';a.href=cv.toDataURL('image/png');a.click();}
+['name','link','tag'].forEach(id=>$(id).addEventListener('input',draw));
+$('dl').addEventListener('click',download);
+document.fonts.ready.then(draw);setTimeout(draw,400);
+</script>'''
+
+
+@app.route('/qr')
+def campaign_qr():
+    return QR_PAGE_HTML, 200, {'Content-Type': 'text/html'}
 
 
 # ─── Run ──────────────────────────────────────────────────────────────────────
