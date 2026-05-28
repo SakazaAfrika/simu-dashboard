@@ -291,36 +291,33 @@ def twiml_msg(body):
         f'<Response><Message>{body}</Message></Response>'
     ), 200, {'Content-Type': 'text/xml'}
 
-
 @app.route('/whatsapp', methods=['POST'])
 def whatsapp_webhook():
     incoming_msg = request.values.get('Body', '').strip()
     from_number = request.values.get('From', '').strip()
 
-    # Check for active conversation
     conv = supabase_request(
         'GET',
-        f'/rest/v1/conversations?phone_number=eq.{from_number}&status=eq.active&limit=1'
+        f'conversations?phone_number=eq.{from_number}&status=eq.active&limit=1'
     )
-    conversation = conv[0] if conv else None
+    conversation = conv[0] if isinstance(conv, list) and conv else None
 
     if conversation is None:
-        # Try to match keyword to a campaign
         campaign_res = supabase_request(
             'GET',
-            f'/rest/v1/campaigns?keyword=ilike.{incoming_msg.lower()}&active=eq.true&limit=1'
+            f'campaigns?keyword=ilike.{incoming_msg.lower()}&active=eq.true&limit=1'
         )
-        campaign = campaign_res[0] if campaign_res else None
+        campaign = campaign_res[0] if isinstance(campaign_res, list) and campaign_res else None
 
         if campaign:
             prompts = campaign.get('prompts', [])
-            supabase_request('POST', '/rest/v1/conversations', {
+            supabase_request('POST', 'conversations', {
                 'phone_number': from_number,
                 'campaign_id': campaign['id'],
                 'current_question_index': 0,
                 'status': 'active'
             })
-            welcome = campaign.get('description') or f"Welcome to {campaign['name']}! Your voice matters."
+            welcome = campaign.get('description') or f"Welcome to {campaign['name']}!"
             reply = f"{welcome}\n\nQuestion 1 of {len(prompts)}:\n{prompts[0]}"
         else:
             reply = "Hi! To join a simu campaign, please use the link or keyword you received."
@@ -328,14 +325,13 @@ def whatsapp_webhook():
     else:
         campaign_res = supabase_request(
             'GET',
-            f'/rest/v1/campaigns?id=eq.{conversation["campaign_id"]}&limit=1'
+            f'campaigns?id=eq.{conversation["campaign_id"]}&limit=1'
         )
-        campaign = campaign_res[0]
+        campaign = campaign_res[0] if isinstance(campaign_res, list) and campaign_res else None
         prompts = campaign.get('prompts', [])
         current_index = conversation['current_question_index']
 
-        # Save this response
-        supabase_request('POST', '/rest/v1/responses', {
+        supabase_request('POST', 'responses', {
             'conversation_id': conversation['id'],
             'phone_number': from_number,
             'question_index': current_index,
@@ -349,19 +345,22 @@ def whatsapp_webhook():
         if next_index < len(prompts):
             supabase_request(
                 'PATCH',
-                f'/rest/v1/conversations?id=eq.{conversation["id"]}',
+                f'conversations?id=eq.{conversation["id"]}',
                 {'current_question_index': next_index}
             )
             reply = f"Question {next_index + 1} of {len(prompts)}:\n{prompts[next_index]}"
         else:
             supabase_request(
                 'PATCH',
-                f'/rest/v1/conversations?id=eq.{conversation["id"]}',
+                f'conversations?id=eq.{conversation["id"]}',
                 {'status': 'completed'}
             )
             reply = campaign.get('closing_message') or "Thank you! Your voice has been recorded. ✅"
 
     return twiml_msg(reply)
+
+
+
 
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
