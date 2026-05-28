@@ -305,7 +305,7 @@ def whatsapp_webhook():
     if conversation is None:
         campaign_res = supabase_request(
             'GET',
-            f'campaigns?keyword=ilike.{incoming_msg.lower()}&active=eq.true&limit=1'
+            f'campaigns?keyword=ilike.{incoming_msg.lower()}&limit=1'
         )
         campaign = campaign_res[0] if isinstance(campaign_res, list) and campaign_res else None
 
