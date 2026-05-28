@@ -295,12 +295,13 @@ def twiml_msg(body):
 @app.route('/whatsapp', methods=['POST'])
 def whatsapp_webhook():
     incoming_msg = request.values.get('Body', '').strip()
-  from_number = request.values.get('From', '').strip()
-    encoded_number = quote(from_number, safe='')
+    from_number = request.values.get('From', '').strip()
+    # Normalise to digits only — avoids all URL-encoding issues with + and :
+    clean_number = re.sub(r'\D', '', from_number)
 
     conv = supabase_request(
         'GET',
-        f'conversations?phone_number=eq.{encoded_number}&status=eq.active&limit=1'
+        f'conversations?phone_number=eq.{clean_number}&status=eq.active&limit=1'
     )
     conversation = conv[0] if isinstance(conv, list) and conv else None
 
@@ -314,7 +315,7 @@ def whatsapp_webhook():
         if campaign:
             prompts = campaign.get('prompts', [])
             supabase_request('POST', 'conversations', {
-                'phone_number': from_number,
+                'phone_number': clean_number,
                 'campaign_id': campaign['id'],
                 'current_question_index': 0,
                 'status': 'active'
@@ -335,7 +336,7 @@ def whatsapp_webhook():
 
         supabase_request('POST', 'responses', {
             'conversation_id': conversation['id'],
-            'phone_number': from_number,
+            'phone_number': clean_number,
             'question_index': current_index,
             'question_text': prompts[current_index],
             'content': incoming_msg,
