@@ -295,11 +295,12 @@ def twiml_msg(body):
 @app.route('/whatsapp', methods=['POST'])
 def whatsapp_webhook():
     incoming_msg = request.values.get('Body', '').strip()
-    from_number = request.values.get('From', '').strip()
+  from_number = request.values.get('From', '').strip()
+    encoded_number = quote(from_number, safe='')
 
     conv = supabase_request(
         'GET',
-        f'conversations?phone_number=eq.{from_number}&status=eq.active&limit=1'
+        f'conversations?phone_number=eq.{encoded_number}&status=eq.active&limit=1'
     )
     conversation = conv[0] if isinstance(conv, list) and conv else None
 
