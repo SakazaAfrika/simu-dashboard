@@ -88,7 +88,16 @@
         {% if campaigns %}https://simubysakaza.com/respond.html?c={{ campaigns[0].slug }}{% endif %}
       </div>
     </div>
-
+{% if campaigns %}
+<a href="/qr?c={{ campaigns[0].slug }}&name={{ campaigns[0].name|urlencode }}"
+   target="_blank"
+   style="display:inline-flex;align-items:center;gap:7px;margin-top:12px;
+          padding:9px 16px;background:#5DCAA5;color:#1F2937;
+          font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;
+          text-decoration:none;border-radius:10px;">
+  ◳ Get QR code
+</a>
+{% endif %}
     <hr class="sidebar-divider">
     <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">
       {{ user.email if user and user.email else '' }}
