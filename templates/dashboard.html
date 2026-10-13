@@ -89,6 +89,9 @@
       </div>
     </div>
 
+    <button id="demoToggle" class="btn btn-ghost btn-sm" onclick="toggleDemo()"
+      style="margin-top:10px;width:100%;text-align:center;">Show sample data</button>
+
     <hr class="sidebar-divider">
     <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">
       {{ user.email if user and user.email else '' }}
@@ -99,6 +102,14 @@
 
   <!-- Main -->
   <main class="main">
+
+    <div id="demoBanner" style="margin-bottom:20px;padding:12px 16px;border-radius:8px;
+      background:rgba(242,196,107,0.12);border:1px solid rgba(242,196,107,0.45);font-size:13px;
+      display:none;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span><strong style="color:#f2c46b;letter-spacing:0.5px;">SAMPLE DATA</strong>
+        &nbsp;Illustrative responses showing how a live campaign looks. Nothing here is saved.</span>
+      <a onclick="toggleDemo()" style="color:var(--accent);cursor:pointer;font-weight:500;">Back to live data</a>
+    </div>
 
     <!-- ── Overview ── -->
     <div id="page-overview">
@@ -197,7 +208,7 @@
         <div class="empty-sub">Analytics will populate as responses come in.</div>
       </div>
       <div id="analyticsContent" style="display:none;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
           <div class="card">
             <p class="label" style="margin-bottom:12px;">By channel</p>
             <div id="channelBreakdown"></div>
@@ -205,6 +216,14 @@
           <div class="card">
             <p class="label" style="margin-bottom:12px;">Response formats</p>
             <div id="formatBreakdown"></div>
+          </div>
+          <div class="card" id="themeCard" style="display:none;">
+            <p class="label" style="margin-bottom:12px;">What people are raising</p>
+            <div id="themeBreakdown"></div>
+          </div>
+          <div class="card" id="countyCard" style="display:none;">
+            <p class="label" style="margin-bottom:12px;">By location</p>
+            <div id="countyBreakdown"></div>
           </div>
         </div>
       </div>
@@ -252,6 +271,10 @@ let currentCampaignId = "{{ campaigns[0].id if campaigns else '' }}";
 let currentSlug       = "{{ campaigns[0].slug if campaigns else '' }}";
 let allResponses      = [];
 
+// Escape text from respondents before putting it into the page
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $id = id => document.getElementById(id);
+
 // ── Fetch responses ──────────────────────────────────────────────────────────
 async function fetchResponses(campaignId) {
   if (!campaignId) return [];
@@ -259,54 +282,82 @@ async function fetchResponses(campaignId) {
   return r.ok ? await r.json() : [];
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function countBy(list, fn) {
+  const m = {};
+  list.forEach(r => { const k = fn(r); if (k) m[k] = (m[k] || 0) + 1; });
+  return Object.entries(m).sort((a, b) => b[1] - a[1]);
+}
+function barList(entries, total) {
+  return entries.map(([k, v]) => `
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span>${esc(k)}</span><span style="color:var(--accent)">${v} · ${Math.round(v/total*100)}%</span>
+      </div>
+      <div style="height:4px;background:var(--border);border-radius:2px;">
+        <div style="height:4px;background:var(--accent);border-radius:2px;width:${v/total*100}%"></div>
+      </div>
+    </div>`).join('');
+}
+const SENT_COLOUR = { negative: '#f08a7a', mixed: '#f2c46b', positive: 'var(--accent)' };
+
+function voiceCard(r, highlight) {
+  const meta = [r.location || 'Unknown location', r.sector].filter(Boolean).map(esc).join(' · ');
+  return `
+    <div class="voice-card"${highlight ? ' style="border-color:var(--accent);"' : ''}>
+      ${r.question_1 ? `<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Biggest challenge</div>` : ''}
+      <div class="voice-text">"${esc(r.content || '(no text)')}"</div>
+      ${r.answer_2 ? `<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:8px;">Impact on you or your family</div>
+        <div class="voice-text">"${esc(r.answer_2)}"</div>` : ''}
+      <div class="voice-meta">
+        ${meta}
+        <span class="badge" style="margin-left:8px;">${esc(r.channel || 'Web')}</span>
+        ${r.format ? `<span class="badge" style="margin-left:4px;">${esc(r.format)}${r.voice_seconds ? ' · ' + esc(r.voice_seconds) + 's' : ''}</span>` : ''}
+        ${r.theme ? `<span class="badge" style="margin-left:4px;">${esc(r.theme)}</span>` : ''}
+        ${r.sentiment ? `<span style="margin-left:6px;color:${SENT_COLOUR[r.sentiment] || 'var(--muted)'};">● ${esc(r.sentiment)}</span>` : ''}
+        ${r.verified ? ' · Verified' : ''}
+      </div>
+    </div>`;
+}
+
 // ── Render data ──────────────────────────────────────────────────────────────
-function renderAll(responses) {
+function renderAll(responses, newest) {
   allResponses = responses;
   const has = responses.length > 0;
   const link = `${RESPOND_BASE}?c=${currentSlug}`;
 
   // Metrics
-  document.getElementById('metricTotal').textContent = has ? responses.length : '0';
+  $id('metricTotal').textContent = has ? responses.length.toLocaleString() : '0';
   const channels = [...new Set(responses.map(r => r.channel).filter(Boolean))];
-  document.getElementById('metricChannels').textContent = has ? channels.length : '—';
-  const locs = responses.filter(r => r.location).length;
-  document.getElementById('metricLocations').textContent = has ? locs : '—';
-  if (has) {
-    const latest = responses[0].submitted_at;
-    document.getElementById('metricLatest').textContent = latest
-      ? new Date(latest).toLocaleDateString() : '—';
-  }
+  $id('metricChannels').textContent = has ? channels.length : '—';
+  const locs = new Set(responses.map(r => r.location).filter(Boolean)).size;
+  $id('metricLocations').textContent = has ? locs : '—';
+  $id('metricLatest').textContent = has && responses[0].submitted_at
+    ? new Date(responses[0].submitted_at).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : '—';
 
   // Overview empty state
-  document.getElementById('overviewEmpty').style.display = has ? 'none' : 'block';
-  document.getElementById('emptyLink').textContent = `Your campaign is live: ${link}`;
+  $id('overviewEmpty').style.display = has ? 'none' : 'block';
+  $id('emptyLink').textContent = `Your campaign is live: ${link}`;
 
   // Latest voices
-  const voicesEl = document.getElementById('latestVoices');
-  if (has) {
-    voicesEl.innerHTML = responses.slice(0,4).map(r => `
-      <div class="voice-card">
-        <div class="voice-text">"${r.content || '(no text)'}"</div>
-        <div class="voice-meta">
-          ${r.location || 'Unknown location'}
-          <span class="badge" style="margin-left:8px;">${r.channel || 'Web'}</span>
-          ${r.verified ? ' · Verified' : ''}
-        </div>
-      </div>`).join('');
-  }
+  const voicesEl = $id('latestVoices');
+  if (has) voicesEl.innerHTML = responses.slice(0, 4).map((r, i) => voiceCard(r, newest && i === 0)).join('');
+  else voicesEl.innerHTML = `<div class="empty"><div class="empty-icon">🎙️</div>
+       <div class="empty-title">No voices yet</div>
+       <div class="empty-sub">Responses will appear here as they come in.</div></div>`;
 
   // Responses page
-  document.getElementById('responsesCount').textContent = `${responses.length} submissions`;
-  document.getElementById('responsesEmpty').style.display = has ? 'none' : 'block';
-  document.getElementById('responsesTable').style.display = has ? 'block' : 'none';
+  $id('responsesCount').textContent = `${responses.length} submissions`;
+  $id('responsesEmpty').style.display = has ? 'none' : 'block';
+  $id('responsesTable').style.display = has ? 'block' : 'none';
   if (has) {
-    document.getElementById('responsesBody').innerHTML = responses.map(r => `
+    $id('responsesBody').innerHTML = responses.map(r => `
       <tr>
-        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          ${r.content || '—'}
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(r.content)}">
+          ${esc(r.content || '—')}
         </td>
-        <td><span class="badge">${r.channel || 'Web'}</span></td>
-        <td>${r.location || '—'}</td>
+        <td><span class="badge">${esc(r.channel || 'Web')}</span></td>
+        <td>${esc(r.location || '—')}</td>
         <td style="color:var(--muted);font-size:12px;">
           ${r.submitted_at ? new Date(r.submitted_at).toLocaleString() : '—'}
         </td>
@@ -315,46 +366,36 @@ function renderAll(responses) {
   }
 
   // Voices page
-  document.getElementById('voicesList').innerHTML = has
-    ? responses.slice(0,20).map(r => `
-        <div class="voice-card">
-          <div class="voice-text">"${r.content || '(no text)'}"</div>
-          <div class="voice-meta">
-            ${r.location || 'Unknown'}
-            <span class="badge" style="margin-left:8px;">${r.channel || 'Web'}</span>
-          </div>
-        </div>`).join('')
+  $id('voicesList').innerHTML = has
+    ? responses.slice(0, 20).map(r => voiceCard(r, false)).join('')
     : `<div class="empty"><div class="empty-icon">🎙️</div>
        <div class="empty-title">No voices yet</div>
        <div class="empty-sub">Real responses will appear here as they come in.</div></div>`;
 
   // Analytics
-  document.getElementById('analyticsEmpty').style.display = has ? 'none' : 'block';
-  document.getElementById('analyticsContent').style.display = has ? 'block' : 'none';
+  $id('analyticsEmpty').style.display = has ? 'none' : 'block';
+  $id('analyticsContent').style.display = has ? 'block' : 'none';
   if (has) {
-    const chanCounts = {};
-    responses.forEach(r => { chanCounts[r.channel || 'Web'] = (chanCounts[r.channel || 'Web'] || 0) + 1; });
-    document.getElementById('channelBreakdown').innerHTML = Object.entries(chanCounts)
-      .map(([k,v]) => `
-        <div style="margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-            <span>${k}</span><span style="color:var(--accent)">${Math.round(v/responses.length*100)}%</span>
-          </div>
-          <div style="height:4px;background:var(--border);border-radius:2px;">
-            <div style="height:4px;background:var(--accent);border-radius:2px;width:${v/responses.length*100}%"></div>
-          </div>
-        </div>`).join('');
+    const n = responses.length;
+    $id('channelBreakdown').innerHTML = barList(countBy(responses, r => r.channel || 'Web'), n);
+    $id('formatBreakdown').innerHTML  = barList(countBy(responses, r => r.format || 'Text'), n);
+    const themes = countBy(responses, r => r.theme);
+    $id('themeCard').style.display = themes.length ? 'block' : 'none';
+    $id('themeBreakdown').innerHTML = barList(themes, n);
+    const places = countBy(responses, r => r.location);
+    $id('countyCard').style.display = places.length ? 'block' : 'none';
+    $id('countyBreakdown').innerHTML = barList(places.slice(0, 8), n);
   }
 
   // Reporting
-  document.getElementById('reportingEmpty').style.display = has ? 'none' : 'block';
-  document.getElementById('reportingContent').style.display = has ? 'block' : 'none';
+  $id('reportingEmpty').style.display = has ? 'none' : 'block';
+  $id('reportingContent').style.display = has ? 'block' : 'none';
 }
 
 // ── Navigation ───────────────────────────────────────────────────────────────
 function showPage(name) {
   ['overview','responses','voices','analytics','reporting'].forEach(p => {
-    document.getElementById(`page-${p}`).style.display = p === name ? 'block' : 'none';
+    $id(`page-${p}`).style.display = p === name ? 'block' : 'none';
   });
   document.querySelectorAll('.nav-item').forEach(el => {
     el.classList.toggle('active', el.getAttribute('onclick')?.includes(name));
@@ -363,33 +404,111 @@ function showPage(name) {
 
 // ── Campaign switcher ────────────────────────────────────────────────────────
 async function switchCampaign() {
-  const sel = document.getElementById('campaignSelect');
+  if (demoMode) stopDemo();
+  const sel = $id('campaignSelect');
   const opt = sel.options[sel.selectedIndex];
+  if (!opt) return;
   currentCampaignId = opt.value;
   currentSlug       = opt.dataset.slug;
-  document.getElementById('pillName').textContent = opt.dataset.name;
-  document.getElementById('pillOrg').textContent  = opt.dataset.org;
-  document.getElementById('pillLink').textContent = `https://simubysakaza.com/respond.html?c=${currentSlug}`;
-  document.getElementById('overviewTitle').textContent = opt.dataset.name;
-  document.getElementById('overviewOrg').textContent   = opt.dataset.org;
+  $id('pillName').textContent = opt.dataset.name;
+  $id('pillOrg').textContent  = opt.dataset.org;
+  $id('pillLink').textContent = `https://simubysakaza.com/respond.html?c=${currentSlug}`;
+  $id('overviewTitle').textContent = opt.dataset.name;
+  $id('overviewOrg').textContent   = opt.dataset.org;
   const responses = await fetchResponses(currentCampaignId);
   renderAll(responses);
 }
 
+// ── Sample data (demo mode) ──────────────────────────────────────────────────
+// Shows illustrative responses on screen only. Nothing is written to the database.
+const DEMO_COLUMNS = ['response_id','submitted_at','channel','format','language','county','sector',
+  'years_in_business','employees','gender','q1_biggest_challenge','q2_impact','theme','sentiment',
+  'voice_seconds','phone_verified'];
+let demoMode = false, demoRows = [], demoQueue = [], demoTimer = null;
+
+function toDemoResponse(row, when) {
+  return Object.assign({}, row, {
+    content: row.q1_biggest_challenge,
+    question_1: true,
+    answer_2: row.q2_impact,
+    location: row.county,
+    verified: row.phone_verified === 'yes',
+    submitted_at: when.toISOString(),
+    _when: when
+  });
+}
+
+async function startDemo() {
+  const r = await fetch('/api/demo-responses');
+  if (!r.ok) { alert('Could not load the sample data. Please refresh and try again.'); return; }
+  const rows = await r.json();
+  // Space the sample out over the last few days so it ends a few minutes ago
+  const now = Date.now();
+  const first = rows.slice(0, 96), later = rows.slice(96);
+  const span = 4 * 24 * 60 * 60 * 1000;
+  demoRows = first.map((row, i) => toDemoResponse(row, new Date(now - 5*60*1000 - span * (1 - i / first.length))))
+                  .reverse();
+  demoQueue = later;
+  demoMode = true;
+  $id('demoToggle').textContent = 'Hide sample data';
+  $id('demoBanner').style.display = 'flex';
+  $id('overviewTitle').textContent = 'Kenya Small Business Pulse';
+  $id('overviewOrg').textContent = 'Sample campaign · small business owners in 12 counties · target 2,000';
+  $id('overviewEmpty').style.display = 'none';
+  renderAll(demoRows);
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  demoTimer = setInterval(() => {
+    if (!demoQueue.length) { clearInterval(demoTimer); demoTimer = null; return; }
+    demoRows.unshift(toDemoResponse(demoQueue.shift(), new Date()));
+    renderAll(demoRows, !reduce);
+  }, 6000);
+}
+
+function stopDemo() {
+  demoMode = false;
+  if (demoTimer) clearInterval(demoTimer);
+  demoTimer = null;
+  $id('demoToggle').textContent = 'Show sample data';
+  $id('demoBanner').style.display = 'none';
+}
+
+async function toggleDemo() {
+  if (demoMode) { stopDemo(); await switchCampaign(); if (!currentCampaignId) renderAll([]); }
+  else await startDemo();
+}
+
 // ── CSV export ───────────────────────────────────────────────────────────────
+function csvCell(v) {
+  const s = String(v ?? '');
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+const pad = n => String(n).padStart(2, '0');
+const localStamp = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 function downloadCSV() {
   if (!allResponses.length) return;
-  const headers = Object.keys(allResponses[0]);
-  const rows = allResponses.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(','));
-  const csv = [headers.join(','), ...rows].join('\n');
+  let headers, rows;
+  if (demoMode) {
+    headers = DEMO_COLUMNS;
+    rows = allResponses.map(r => headers.map(h => csvCell(
+      h === 'submitted_at' ? localStamp(r._when) : r[h])).join(','));
+  } else {
+    headers = Object.keys(allResponses[0]);
+    rows = allResponses.map(r => headers.map(h => {
+      const v = r[h];
+      return csvCell(v !== null && typeof v === 'object' ? JSON.stringify(v) : v);
+    }).join(','));
+  }
+  // The BOM makes Excel read Kiswahili and other accented text correctly
+  const csv = '﻿' + [headers.join(','), ...rows].join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  a.download = 'simu_responses.csv';
+  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'}));
+  a.download = demoMode ? 'simu_sample_responses.csv' : 'simu_responses.csv';
   a.click();
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 (async () => {
+  if (new URLSearchParams(location.search).get('demo') === '1') { await startDemo(); return; }
   if (currentCampaignId) {
     const responses = await fetchResponses(currentCampaignId);
     renderAll(responses);
